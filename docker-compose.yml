@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  ubuntu-base:
+    build:
+      context: .
+      args:
+        install_dir: ./install
+        set_dir: ./set
+        image_build_dir: ./build/ubuntu-base
+      dockerfile: build/ubuntu-base/Dockerfile
+    image: "ubuntu-base:jimmy"
+    stdin_open: true
+    tty: true
+

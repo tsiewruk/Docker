@@ -9,7 +9,7 @@ services:
         set_dir: ./set
         image_build_dir: ./build/ubuntu-base
       dockerfile: build/ubuntu-base/Dockerfile
-    image: "ubuntu-base:jimmy"
+    image: "ubuntu-base:latest"
     stdin_open: true
     tty: true
 

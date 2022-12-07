@@ -2,13 +2,15 @@
 
 set -e
 
-TZ="${1}"
+TIMEZONE="${1}"
 
-if [-f "/usr/share/zoneinfo/${TZ}" ]; then
-	ln -snf "/usr/share/zoneifo/${TZ}" /etc/localtime
-	echo "${TZ}" > /etc/timezome
-	date
+echo "Set timezone - ${TIMEZONE}"
+
+if [ -f /usr/share/zoneinfo/"${TIMEZONE}" ]; then
+    ln -snf /usr/share/zoneinfo/"${TIMEZONE}" /etc/localtime
+    echo "${TIMEZONE}" > /etc/timezone
+    date
 else
-	echo 'Bad time zone!'
-	exit 1
+    echo "Bad time zone!"
+    exit 1
 fi

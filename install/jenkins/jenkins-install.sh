@@ -15,4 +15,4 @@ echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
   /etc/apt/sources.list.d/jenkins.list > /dev/null
 
 apt-get update
-apt-get install jenkins
+apt-get install -y jenkins

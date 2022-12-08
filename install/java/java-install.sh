@@ -10,5 +10,5 @@ JAVA_VERSION="$1"
 echo-info "Installing Java-${JAVA_VERSION}"
 
 apt-get update
-apt-get install "openjdk-${JAVA_VERSION}-jre"
+apt-get install -y "openjdk-${JAVA_VERSION}-jre"
 

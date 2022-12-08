@@ -14,3 +14,15 @@ services:
     stdin_open: true
     tty: true
 
+  jenkins:
+    build:
+      context: .
+      args:
+        install_dir: ./install
+        set_dir: ./set
+        source_dir: ./source
+        image_build_dir: ./build/jenkins
+      dockerfile: build/jenkins/Dockerfile
+    image: "jenkins:latest"
+    stdin_open: true
+    tty: true

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+source_dir="$(dirname "$0")"
+source ${source_dir}/../../source/font.sh
+
+SERVICE="${1}"
+
+s6-svc -d "/etc/s6/services/${SERVICE}"
+echo-success "Service ${SERVICE} - stopped"
+

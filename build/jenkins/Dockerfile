@@ -22,7 +22,7 @@ COPY "${source_dir}" "${TMP_FILES_DIR}/source/"
 COPY "${image_build_dir}/files" /
 
 # additional requirements
-RUN chmod 777 /tmp \ 
+RUN chmod 777 /tmp \
     && apt-get update -y
 # install java
 RUN "${TMP_FILES_DIR}/install/java/java-install.sh" "${JAVA_VERSION}"
@@ -31,3 +31,5 @@ RUN "${TMP_FILES_DIR}/install/jenkins/jenkins-install.sh"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
     && rm -rf "${TMP_FILES_DIR}"
+
+CMD ["entrypoint.sh"]

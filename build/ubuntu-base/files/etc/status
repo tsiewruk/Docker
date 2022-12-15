@@ -7,7 +7,7 @@ source ${source_dir}/../../source/font.sh
 
 SERVICE="${1}"
 
-if s6-svstat "/etc/s6/services/${SERVICE}" | grep -q '^up'; then
+if s6-svstat "/ervices/${SERVICE}" | grep -q '^up'; then
   echo-info "Service ${SERVICE} is up"
 else
   echo-info "Service ${SERVICE} is not up"

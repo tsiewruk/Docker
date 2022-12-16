@@ -11,7 +11,13 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-echo "alias 'service status'='bash /etc/status.sh'" >> ~/.bash_aliases
-echo "alias 'service restart'='bash /etc/restart.sh'" >> ~/.bash_aliases
-echo "alias 'service stop'='bash /etc/stop.sh'" >> ~/.bash_aliases
-echo "alias 'service start'='bash /etc/start.sh'" >> ~/.bash_aliases
+declare -A alias_collection=(
+    [service-status]="bash /etc/status.sh"
+    [service-start]="bash /etc/start.sh"
+    [service-stop]="bash /etc/stop.sh"
+    [service-restart]="bash /etc/restart.sh"
+)
+
+for alias_c in ${!alias_collection[*]}; do
+    echo 'alias \"${alias_c}\"=\"${alias_collection[${alias_c}]}\"' >> ~/.bash_aliases
+done

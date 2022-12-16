@@ -12,12 +12,12 @@ if [ -f ~/.bash_aliases ]; then
 fi
 
 declare -A alias_collection=(
-    [service-status]="bash /etc/status.sh"
-    [service-start]="bash /etc/start.sh"
-    [service-stop]="bash /etc/stop.sh"
-    [service-restart]="bash /etc/restart.sh"
+    [service-status]="/etc/status.sh"
+    [service-start]="/etc/start.sh"
+    [service-stop]="/etc/stop.sh"
+    [service-restart]="/etc/restart.sh"
 )
 
 for alias_c in ${!alias_collection[*]}; do
-    echo 'alias \"${alias_c}\"=\"${alias_collection[${alias_c}]}\"' >> ~/.bash_aliases
+    echo "alias ${alias_c}=${alias_collection[${alias_c}]}" >> ~/.bash_aliases
 done

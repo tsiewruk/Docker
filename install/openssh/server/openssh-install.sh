@@ -2,7 +2,8 @@
 
 set -e
 
-SCRIPT_DIR=$(dirname $(readlink -f "$0"))
+source_dir="$(dirname $(readlink -f "$0"))"
+source ${source_dir}/../../source/font.sh
 
 cp -R "${SCRIPT_DIR}/files/service" /
 

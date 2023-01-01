@@ -2,6 +2,9 @@
 
 set -e
 
+source_dir="$(dirname $(readlink -f "$0"))"
+source ${source_dir}/../../source/font.sh
+
 ANSIBLE_VERISON="${1}"
 
 echo-info "Installing Ansible"

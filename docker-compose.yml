@@ -24,5 +24,7 @@ services:
         image_build_dir: ./build/jenkins
       dockerfile: build/jenkins/Dockerfile
     image: "jenkins:latest"
+    ports:
+      - 8888
     stdin_open: true
     tty: true

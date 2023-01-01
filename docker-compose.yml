@@ -22,6 +22,7 @@ services:
         set_dir: ./set
         source_dir: ./source
         image_build_dir: ./build/ansible
+        ANSIBLE_VERSION: 2.9
       dockerfile: build/ansible/Dockerfile
     image: "ansible:latest"
     stdin_open: true

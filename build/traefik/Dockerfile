@@ -7,7 +7,7 @@ ARG set_dir
 ARG install_dir
 ARG source_dir
 ARG image_build_dir
-ARG ANSIBLE_VERSION
+ARG TRAEFIK_VERSION
 
 # ARG build
 ARG DEBIAN_FRONTEND='noineractive'
@@ -25,8 +25,11 @@ COPY "${image_build_dir}/files" /
 RUN chmod 777 /tmp
 # install openssh-server
 RUN "${TMP_FILES_DIR}/install/openssh/server/openssh-install.sh"
-# install ansible
-RUN "${TMP_FILES_DIR}/install/ansible/ansible-install.sh" "${ANSIBLE_VERSION}"
+# install traefik
+RUN "${TMP_FILES_DIR}/install/traefik/traefik-install.sh" "${TRAEFIK_VERSION}"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
     && rm -rf "${TMP_FILES_DIR}"
+
+ENTRYPOINT ["entrypoint.sh"]
+EXPOSE 80

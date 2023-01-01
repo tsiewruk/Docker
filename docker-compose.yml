@@ -42,3 +42,26 @@ services:
       - VARNISH_CONFIG=default
     stdin_open: true
     tty: true
+
+  traefik:
+      build:
+        context: .
+        args:
+          install_dir: ./install
+          set_dir: ./set
+          source_dir: ./source
+          image_build_dir: ./build/traefik
+          TRAEFIK_VERSION:
+        dockerfile: build/traefik/Dockerfile
+      image: "traefik:latest"
+      ports:
+        - "80:80"
+        - "443:443"
+      labels:
+        - "traefik.enable=true"
+        - "traefik.backend=traefik"
+        - "traefik.port=8080"
+        - "traefik.frontend.rule=Host:traefik.local"
+        - "traefik.frontend.priority=10"
+      stdin_open: true
+      tty: true

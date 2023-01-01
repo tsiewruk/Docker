@@ -3,9 +3,9 @@
 set -e
 
 source_dir="$(dirname $(readlink -f "$0"))"
-source ${source_dir}/../../source/font.sh
+source ${source_dir}/../../../source/font.sh
 
-cp -R "${SCRIPT_DIR}/files/service" /
+cp -R "${source_dir/files/service}" /
 
 echo-info "Installing Openssh-server"
 apt-get -y update

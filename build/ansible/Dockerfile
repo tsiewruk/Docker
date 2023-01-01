@@ -24,8 +24,7 @@ COPY "${image_build_dir}/files" /
 # additional requirements
 RUN chmod 777 /tmp
 # install openssh
-RUN "${TMP_FILES_DIR}/install/openssh/server/openssh-install.sh" \
-    && chmod 644 /root/.ssh/config
+RUN "${TMP_FILES_DIR}/install/openssh/server/openssh-install.sh"
 # install ansible
 RUN "${TMP_FILES_DIR}/install/ansible/ansible-install.sh" "${ANSIBLE_VERSION}"
 # clean up

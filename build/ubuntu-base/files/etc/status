@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+source_dir="$(dirname "$0")"
+source ${source_dir}/../../source/font.sh
+
+SERVICE="${1}"
+
+if s6-svstat "/ervices/${SERVICE}" | grep -q '^up'; then
+  echo-info "Service ${SERVICE} is up"
+else
+  echo-info "Service ${SERVICE} is not up"
+fi

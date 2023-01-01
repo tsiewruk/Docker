@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -e
+
+source_dir="$(dirname "$0")"
+source ${source_dir}/../../source/font.sh
+
+SERVICE="${1}"
+
+s6-svc -t "/services/${SERVICE}"
+if s6-svstat "/services/${SERVICE}" | grep -q '^up'; then
+  echo-success "Service ${SERVICE} restarted"
+  echo-info "Service ${SERVICE} is up, PID>" `ps auxf | grep ${SERVICE} | awk '{print $2}' | head -n1`
+else
+  echo-error "Service ${SERVICE} is not up!"
+fi

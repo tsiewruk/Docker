@@ -35,6 +35,8 @@ RUN apt-get install -y --no-install-recommends \
 RUN "${TMP_FILES_DIR}/set/timezone/set-timezone.sh" "${TIMEZONE}"
 # set locals
 RUN locale-gen en_US.UTF-8 pl_PL.UTF-8
+# set alias
+RUN "${TMP_FILES_DIR}/set/alias/set-alias.sh"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
     && rm -rf "${TMP_FILES_DIR}"

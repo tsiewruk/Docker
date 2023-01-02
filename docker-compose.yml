@@ -51,7 +51,7 @@ services:
           set_dir: ./set
           source_dir: ./source
           image_build_dir: ./build/traefik
-          TRAEFIK_VERSION:
+          TRAEFIK_VERSION: 2.9.6
         dockerfile: build/traefik/Dockerfile
       image: "traefik:latest"
       ports:

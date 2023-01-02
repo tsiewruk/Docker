@@ -11,3 +11,7 @@ TRAEFIK_VERSION="${1}"
 
 echo-info "Installing Traefik"
 
+wget "https://github.com/traefik/traefik/releases/download/v2.9.6/traefik_v${TRAEFIK_VERSION}_linux_amd64.tar.gz" -P /tmp/traefik
+tar -xf "/tmp/traefik/traefik_v${TRAEFIK_VERSION}_linux_amd64.tar.gz" -C /usr/local/bin/ traefik
+
+rm -rf /tmp/traefik

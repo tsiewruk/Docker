@@ -15,6 +15,7 @@ ARG DEBIAN_FRONTEND='noineractive'
 ARG TMP_FILES_DIR='/tmp/tmp_install'
 
 # ENV build + image
+ENV MYSQL_PASSWORD='pa$$w0rd'
 
 # required files
 COPY "${install_dir}" "${TMP_FILES_DIR}/install/"

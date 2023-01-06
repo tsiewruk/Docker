@@ -8,6 +8,7 @@ ARG install_dir
 ARG source_dir
 ARG image_build_dir
 ARG ZABBIX_VERSION
+ARG MYSQL_VERSION
 
 # ARG build
 ARG DEBIAN_FRONTEND='noineractive'
@@ -25,6 +26,8 @@ COPY "${image_build_dir}/files" /
 RUN chmod 777 /tmp
 # install zabbix
 RUN "${TMP_FILES_DIR}/install/zabbix/zabbix-install.sh" "${ZABBIX_VERSION}" "${UBUNTU_VERSION}"
+# install mysql
+RUN "${TMP_FILES_DIR}/install/zabbix/zabbix-install.sh" "${MYSQL_VERSION}"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
     && rm -rf "${TMP_FILES_DIR}"

@@ -54,6 +54,8 @@ services:
           TRAEFIK_VERSION: 2.9.6
         dockerfile: build/traefik/Dockerfile
       image: "traefik:latest"
+      environment:
+        - TRAEFIK_CONFIG= default
       ports:
         - "80:80"
         - "443:443"

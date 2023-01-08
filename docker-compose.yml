@@ -54,6 +54,8 @@ services:
           TRAEFIK_VERSION: 2.9.6
         dockerfile: build/traefik/Dockerfile
       image: "traefik:latest"
+      environment:
+        - TRAEFIK_CONFIG= default
       ports:
         - "80:80"
         - "443:443"
@@ -65,3 +67,18 @@ services:
         - "traefik.frontend.priority=10"
       stdin_open: true
       tty: true
+
+  zabbix:
+    build:
+      context: .
+      args:
+        install_dir: ./install
+        set_dir: ./set
+        source_dir: ./source
+        image_build_dir: ./build/varnish
+        ZABBIX_VERSION: 6.0.4
+        MYSQL_VERSION: 7.4
+      dockerfile: build/varnish/Dockerfile
+    image: "zabbix:latest"
+    stdin_open: true
+    tty: true

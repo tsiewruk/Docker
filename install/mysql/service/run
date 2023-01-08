@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+exec /usr/bin/mysqld_safe --datadir='/var/lib/mysql' --disable-log-bin

@@ -75,7 +75,7 @@ services:
         source_dir: ./source
         image_build_dir: ./build/varnish
         ZABBIX_VERSION: 6.0.4
-        MYSQL_VERSION: 8
+        MYSQL_VERSION: 7.4
       dockerfile: build/varnish/Dockerfile
     image: "zabbix:latest"
     stdin_open: true

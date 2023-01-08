@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+pkill nginx || true
+
+mkdir -p /var/log/nginx
+chown -R www-data:adm /var/log/nginx
+
+exec nginx -g "daemon off; master_process on;"

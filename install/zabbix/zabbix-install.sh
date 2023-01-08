@@ -3,10 +3,11 @@
 set -e
 
 ZABBIX_VERSION="${1}"
-UBUNTU_VERSION="${2}"
+UBUNTU_VERSION="$(lsb_release -r)"
 
 source_dir="$(dirname $(readlink -f "$0"))"
 source ${source_dir}/../../../source/font.sh
+
 
 cp -R "${source_dir/files/service}" /
 

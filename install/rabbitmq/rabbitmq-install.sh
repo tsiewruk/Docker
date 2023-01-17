@@ -23,4 +23,4 @@ deb-src [signed-by=/usr/share/keyrings/io.packagecloud.rabbitmq.gpg] https://pac
 EOF
 
 ## Install rabbitmq-server and its dependencies
-apt-get install rabbitmq-server -y --fix-missing
+apt-get install --no-install-recommends -y --fix-missing rabbitmq-server

@@ -24,7 +24,7 @@ EOF
 apt-get update -y
 
 ## Install Erlang packages
-apt-get install -y erlang-base \
+apt-get install --no-install-recommends -y erlang-base \
                         erlang-asn1 erlang-crypto erlang-eldap erlang-ftp erlang-inets \
                         erlang-mnesia erlang-os-mon erlang-parsetools erlang-public-key \
                         erlang-runtime-tools erlang-snmp erlang-ssl \

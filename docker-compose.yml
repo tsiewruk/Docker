@@ -78,5 +78,9 @@ services:
         RABBITMQ_VERSION: 3.11.*
       dockerfile: build/rabbitmq/Dockerfile
     image: "rabbitmq:latest"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "25672:25672"
     stdin_open: true
     tty: true

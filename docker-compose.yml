@@ -65,3 +65,18 @@ services:
         - "traefik.frontend.priority=10"
       stdin_open: true
       tty: true
+
+  rabbitmq:
+    build:
+      context: .
+      args:
+        install_dir: ./install
+        set_dir: ./set
+        source_dir: ./source
+        image_build_dir: ./build/rabbitmq
+        ERLANG_VERSION: 25.2
+        RABBITMQ_VERSION: 3.11.*
+      dockerfile: build/rabbitmq/Dockerfile
+    image: "rabbitmq:latest"
+    stdin_open: true
+    tty: true

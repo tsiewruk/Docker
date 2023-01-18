@@ -74,8 +74,6 @@ services:
         set_dir: ./set
         source_dir: ./source
         image_build_dir: ./build/rabbitmq
-        ERLANG_VERSION: 25.2
-        RABBITMQ_VERSION: 3.11.*
       dockerfile: build/rabbitmq/Dockerfile
     image: "rabbitmq:latest"
     ports:

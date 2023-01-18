@@ -5,8 +5,7 @@ set -e
 source_dir="$(dirname $(readlink -f "$0"))"
 source ${source_dir}/../../source/font.sh
 
-RABBITMQ_VERISON="${1}"
-UBUNTU_RELEASE"${2}"
+UBUNTU_RELEASE="${1}"
 
 echo-info "Installing Rabbitmq"
 
@@ -23,4 +22,4 @@ deb-src [signed-by=/usr/share/keyrings/io.packagecloud.rabbitmq.gpg] https://pac
 EOF
 
 ## Install rabbitmq-server and its dependencies
-apt-get install --no-install-recommends -y --fix-missing rabbitmq-server
+apt-get install -y --no-install-recommends --fix-missing rabbitmq-server

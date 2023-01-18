@@ -25,10 +25,15 @@ COPY "${image_build_dir}/files" /
 
 # additional requirements
 RUN chmod 777 /tmp
+# install requirements
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends dpkg-dev
+# install ssl
+RUN "${TMP_FILES_DIR}/install/ssl/ssl-install.sh"
 # install erlang
-RUN "${TMP_FILES_DIR}/install/erlang/erlang-install.sh" "${ERLANG_VERSION}" "${UBUNTU_RELEASE}"
+RUN "${TMP_FILES_DIR}/install/erlang/erlang-install.sh" "${UBUNTU_RELEASE}"
 # install rabbitmq
-RUN "${TMP_FILES_DIR}/install/rabbitmq/rabbitmq-install.sh" "${RABBITMQ_VERSION}" "${UBUNTU_RELEASE}"
+RUN "${TMP_FILES_DIR}/install/rabbitmq/rabbitmq-install.sh" "${UBUNTU_RELEASE}"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
     && rm -rf "${TMP_FILES_DIR}"

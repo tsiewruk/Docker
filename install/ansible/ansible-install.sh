@@ -10,5 +10,5 @@ ANSIBLE_VERISON="${1}"
 echo-info "Installing Ansible"
 
 apt-get update -y
-apt-get install -y --no-install-recommends python3 python3-pip python3-dev
+apt-get install -y --no-install-recommends python3 python3-pip
 pip install ansible=="${ANSIBLE_VERISON}"

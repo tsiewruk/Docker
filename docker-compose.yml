@@ -68,17 +68,35 @@ services:
       stdin_open: true
       tty: true
 
+
   zabbix:
+      build:
+        context: .
+        args:
+          install_dir: ./install
+          set_dir: ./set
+          source_dir: ./source
+          image_build_dir: ./build/zabbix
+          ZABBIX_VERSION: 6.0.4
+          MYSQL_VERSION: 7.4
+        dockerfile: build/varnish/Dockerfile
+    image: "zabbix:latest"
+    stdin_open: true
+    tty: true
+
+  rabbitmq:
     build:
       context: .
       args:
         install_dir: ./install
         set_dir: ./set
         source_dir: ./source
-        image_build_dir: ./build/varnish
-        ZABBIX_VERSION: 6.0.4
-        MYSQL_VERSION: 7.4
-      dockerfile: build/varnish/Dockerfile
-    image: "zabbix:latest"
+        image_build_dir: ./build/rabbbitmq
+      dockerfile: build/rabbitmq/Dockerfile
+    image: "rabbitmq:latest"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "25672:25672"
     stdin_open: true
     tty: true

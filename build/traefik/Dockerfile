@@ -31,5 +31,5 @@ RUN "${TMP_FILES_DIR}/install/traefik/traefik-install.sh" "${TRAEFIK_VERSION}"
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
     && rm -rf "${TMP_FILES_DIR}"
 
-ENTRYPOINT ["entrypoint.sh"]
 EXPOSE 80
+ENTRYPOINT ["entrypoint.sh"]

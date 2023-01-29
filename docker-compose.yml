@@ -26,6 +26,12 @@ services:
         PYTHON_VERSION: 3.10
       dockerfile: build/ansible/Dockerfile
     image: "ansible:latest"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ansible.rule=Host(`ansible.dev`)"
+      - "traefik.http.routers.ansible.service=ansible"
+      - "traefik.http.routers.ansible.tls=true"
+      - "traefik.http.services.ansible.loadbalancer.server.port=80"
     stdin_open: true
     tty: true
 
@@ -62,9 +68,9 @@ services:
         - "443:443"
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.traefik.rule=Host(`traefik.local`)"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.dev`)"
         - "traefik.http.routers.api.service=api@internal"
-        - "traefik.http.routers.landing.tls=true"
+        - "traefik.http.routers.traefik.tls=true"
       stdin_open: true
       tty: true
 
@@ -80,6 +86,12 @@ services:
         MYSQL_VERSION: 7.4
       dockerfile: build/varnish/Dockerfile
     image: "zabbix:latest"
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.zabbix.rule=Host(`zabbix.dev`)"
+#      - "traefik.http.routers.zabbix.service=zabbix"
+#      - "traefik.http.routers.zabbix.tls=true"
+#      - "traefik.http.services.zabbix.loadbalancer.server.port=80"
     stdin_open: true
     tty: true
 
@@ -97,5 +109,11 @@ services:
       - "5672:5672"
       - "15672:15672"
       - "25672:25672"
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.dev`)"
+#      - "traefik.http.routers.rabbitmq.service=rabbitmq"
+#      - "traefik.http.routers.rabbitmq.tls=true"
+#      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
     stdin_open: true
     tty: true

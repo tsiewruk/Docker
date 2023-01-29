@@ -8,7 +8,7 @@ source "${source_dir}/../../source/font.sh"
 ANSIBLE_VERISON="${1}"
 PYTHON_VERSION="${2}"
 
-"/../python/python3-install.sh" "${PYTHON_VERSION}"
+"${TMP_FILES_DIR}/python/python3-install.sh" "${PYTHON_VERSION}"
 
 echo-info "Installing Ansible"
 

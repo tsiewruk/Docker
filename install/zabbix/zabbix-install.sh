@@ -12,7 +12,7 @@ UBUNTU_VERSION="$(lsb_release -r)"
 
 echo-info "Installing Zabbix"
 
-wget "https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/ubuntu/pool/main/z/zabbix-release/zabbix-release_${ZABBIX_VERSION%2Bubuntu${UBUNTU_VERSION}_all.deb" -P /tmp/zabbix
+wget "https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/ubuntu/pool/main/z/zabbix-release/zabbix-release_${ZABBIX_VERSION}2Bubuntu${UBUNTU_VERSION}_all.deb" -P /tmp/zabbix
 dpkg -i "/tmp/zabbix/zabbix-release_${ZABBIX_VERSION}+ubuntu${UBUNTU_VERSION}_all.deb"
 apt-get -y update
 apt-get -y install --no-install-recommends zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent

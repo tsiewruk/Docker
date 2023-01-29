@@ -62,10 +62,9 @@ services:
         - "443:443"
       labels:
         - "traefik.enable=true"
-        - "traefik.backend=traefik"
-        - "traefik.port=8080"
-        - "traefik.frontend.rule=Host:traefik.local"
-        - "traefik.frontend.priority=10"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.local`)"
+        - "traefik.http.routers.api.service=api@internal"
+        - "traefik.http.routers.landing.tls=true"
       stdin_open: true
       tty: true
 

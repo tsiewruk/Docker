@@ -8,6 +8,7 @@ ARG install_dir
 ARG source_dir
 ARG image_build_dir
 ARG ANSIBLE_VERSION
+ARG PYTHON_VERSION
 
 # ARG build
 ARG DEBIAN_FRONTEND='noineractive'
@@ -26,7 +27,7 @@ RUN chmod 777 /tmp
 # install openssh-server
 RUN "${TMP_FILES_DIR}/install/openssh/server/openssh-install.sh"
 # install ansible
-RUN "${TMP_FILES_DIR}/install/ansible/ansible-install.sh" "${ANSIBLE_VERSION}"
+RUN "${TMP_FILES_DIR}/install/ansible/ansible-install.sh" "${ANSIBLE_VERSION}" "${PYTHON_VERSION}"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
     && rm -rf "${TMP_FILES_DIR}"

@@ -3,12 +3,13 @@
 set -e
 
 source_dir="$(dirname $(readlink -f "$0"))"
-source ${source_dir}/../../source/font.sh
+source "${source_dir}/../../source/font.sh"
 
 ANSIBLE_VERISON="${1}"
+PYTHON_VERSION="${2}"
+
+"/../python/python3-install.sh" "${PYTHON_VERSION}"
 
 echo-info "Installing Ansible"
 
-apt-get update -y
-apt-get install -y --no-install-recommends python3 python3-pip
 pip install ansible=="${ANSIBLE_VERISON}"

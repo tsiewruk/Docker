@@ -23,6 +23,7 @@ services:
         source_dir: ./source
         image_build_dir: ./build/ansible
         ANSIBLE_VERSION: 2.9
+        PYTHON_VERSION: 3.10
       dockerfile: build/ansible/Dockerfile
     image: "ansible:latest"
     stdin_open: true
@@ -68,18 +69,17 @@ services:
       stdin_open: true
       tty: true
 
-
   zabbix:
-      build:
-        context: .
-        args:
-          install_dir: ./install
-          set_dir: ./set
-          source_dir: ./source
-          image_build_dir: ./build/zabbix
-          ZABBIX_VERSION: 6.0.4
-          MYSQL_VERSION: 7.4
-        dockerfile: build/varnish/Dockerfile
+    build:
+      context: .
+      args:
+        install_dir: ./install
+        set_dir: ./set
+        source_dir: ./source
+        image_build_dir: ./build/zabbix
+        ZABBIX_VERSION: 6.0.4
+        MYSQL_VERSION: 7.4
+      dockerfile: build/varnish/Dockerfile
     image: "zabbix:latest"
     stdin_open: true
     tty: true

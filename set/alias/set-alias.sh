@@ -3,7 +3,7 @@
 set -e
 
 source_dir="$(dirname "$0")"
-source ${source_dir}/../../source/font.sh
+source "${source_dir}/../../source/font.sh"
 
 echo-info "Setting aliases"
 
@@ -18,6 +18,6 @@ declare -A alias_collection=(
     [service-restart]="/etc/restart.sh"
 )
 
-for alias_c in ${!alias_collection[*]}; do
-    echo "alias ${alias_c}=${alias_collection[${alias_c}]}" >> ~/.bash_aliases
+for alias in ${!alias_collection[*]}; do
+    echo "alias ${alias}=${alias_collection[${alias}]}" >> ~/.bash_aliases
 done

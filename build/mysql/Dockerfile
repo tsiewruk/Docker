@@ -23,10 +23,7 @@ COPY "${image_build_dir}/files" /
 
 # additional requirements
 RUN chmod 777 /tmp
-# install requirements
-RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends dpkg-dev
-# install ssl
+# install mysql
 RUN "${TMP_FILES_DIR}/install/mysql/mysql-install.sh" "${MYSQL_VERSION}"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \

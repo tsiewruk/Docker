@@ -137,3 +137,30 @@ services:
 #     - "traefik.http.services.teraform.loadbalancer.server.port=80"
     stdin_open: true
     tty: true
+
+  mysql:
+    build:
+      context: .
+      args:
+        install_dir: ./install
+        set_dir: ./set
+        source_dir: ./source
+        image_build_dir: ./build/mysql
+        MYSQL_VERSION: 8
+      dockerfile: build/mysql/Dockerfile
+      image: "mysql:latest"
+      stdin_open: true
+      tty: true
+    volumes:
+      - mysql_db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=password
+    expose:
+      - 3306
+      - 33060
+
+  volumes:
+    mysql_db:

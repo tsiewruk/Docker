@@ -16,9 +16,7 @@ services:
     build:
       context: .
       args:
-        install_dir: ./install
-        set_dir: ./set
-        source_dir: ./source
+        image_cookbook_dir: ./cookbook
         image_build_dir: ./build/ansible
         ANSIBLE_VERSION: 2.9
         PYTHON_VERSION: 3.9

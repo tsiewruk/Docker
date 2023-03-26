@@ -5,9 +5,7 @@ services:
     build:
       context: .
       args:
-        install_dir: ./install
-        set_dir: ./set
-        source_dir: ./source
+        image_cookbook_dir: ./cookbook
         image_build_dir: ./build/ubuntu-base
       dockerfile: build/ubuntu-base/Dockerfile
     image: "ubuntu-base:latest"

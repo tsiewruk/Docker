@@ -3,21 +3,17 @@ FROM ubuntu-base:latest
 MAINTAINER Tomasz Siewruk <tomasz.m.siewruk@gmail.com>
 
 # ARG from docker-compose
-ARG set_dir
-ARG install_dir
-ARG source_dir
+ARG image_cookbook_dir
 ARG image_build_dir
 
 # ARG build
 ARG DEBIAN_FRONTEND='noineractive'
-ARG TMP_FILES_DIR='/tmp/tmp_install'
+ARG TMP_FILES_DIR='/tmp/cookbook/'
 
 # ENV build + image
 
 # required files
-COPY "${install_dir}" "${TMP_FILES_DIR}/install/"
-COPY "${set_dir}" "${TMP_FILES_DIR}/set/"
-COPY "${source_dir}" "${TMP_FILES_DIR}/source/"
+COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"
 #COPY "${image_build_dir}/files" /
 
 # additional requirements

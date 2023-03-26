@@ -5,9 +5,7 @@ services:
     build:
       context: .
       args:
-        install_dir: ./install
-        set_dir: ./set
-        source_dir: ./source
+        image_cookbook_dir: ./cookbook
         image_build_dir: ./build/ubuntu-base
       dockerfile: build/ubuntu-base/Dockerfile
     image: "ubuntu-base:latest"
@@ -18,9 +16,7 @@ services:
     build:
       context: .
       args:
-        install_dir: ./install
-        set_dir: ./set
-        source_dir: ./source
+        image_cookbook_dir: ./cookbook
         image_build_dir: ./build/ansible
         ANSIBLE_VERSION: 2.9
         PYTHON_VERSION: 3.9
@@ -39,9 +35,7 @@ services:
     build:
       context: .
       args:
-        install_dir: ./install
-        set_dir: ./set
-        source_dir: ./source
+        image_cookbook_dir: ./cookbook
         image_build_dir: ./build/varnish
       dockerfile: build/varnish/Dockerfile
     image: "varnish:latest"
@@ -51,36 +45,32 @@ services:
     tty: true
 
   traefik:
-      build:
-        context: .
-        args:
-          install_dir: ./install
-          set_dir: ./set
-          source_dir: ./source
-          image_build_dir: ./build/traefik
-          TRAEFIK_VERSION: 2.9.6
-        dockerfile: build/traefik/Dockerfile
-      image: "traefik:latest"
-      environment:
-        - TRAEFIK_CONFIG= default
-      ports:
-        - "80:80"
-        - "443:443"
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.traefik.rule=Host(`traefik.dev`)"
-        - "traefik.http.routers.api.service=api@internal"
-        - "traefik.http.routers.traefik.tls=true"
-      stdin_open: true
-      tty: true
+    build:
+      context: .
+      args:
+        image_cookbook_dir: ./cookbook
+        image_build_dir: ./build/traefik
+        TRAEFIK_VERSION: 2.9.6
+      dockerfile: build/traefik/Dockerfile
+    image: "traefik:latest"
+    environment:
+      - TRAEFIK_CONFIG= default
+    ports:
+      - "80:80"
+      - "443:443"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.dev`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.traefik.tls=true"
+    stdin_open: true
+    tty: true
 
   zabbix:
     build:
       context: .
       args:
-        install_dir: ./install
-        set_dir: ./set
-        source_dir: ./source
+        image_cookbook_dir: ./cookbook
         image_build_dir: ./build/zabbix
         ZABBIX_VERSION: 6.0.4
         MYSQL_VERSION: 7.4
@@ -99,9 +89,7 @@ services:
     build:
       context: .
       args:
-        install_dir: ./install
-        set_dir: ./set
-        source_dir: ./source
+        image_cookbook_dir: ./cookbook
         image_build_dir: ./build/rabbbitmq
       dockerfile: build/rabbitmq/Dockerfile
     image: "rabbitmq:latest"
@@ -122,9 +110,7 @@ services:
     build:
       context: .
       args:
-        install_dir: ./install
-        set_dir: ./set
-        source_dir: ./source
+        image_cookbook_dir: ./cookbook
         image_build_dir: ./build/terraform
         TERRAFORM_VERSION: 1.3.7
       dockerfile: build/terraform/Dockerfile
@@ -142,15 +128,13 @@ services:
     build:
       context: .
       args:
-        install_dir: ./install
-        set_dir: ./set
-        source_dir: ./source
+        image_cookbook_dir: ./cookbook
         image_build_dir: ./build/mysql
         MYSQL_VERSION: 8
       dockerfile: build/mysql/Dockerfile
-      image: "mysql:latest"
-      stdin_open: true
-      tty: true
+    image: "mysql:latest"
+    stdin_open: true
+    tty: true
     volumes:
       - mysql_db:/var/lib/mysql
     environment:

@@ -4,6 +4,7 @@ MAINTAINER Tomasz Siewruk <tomasz.m.siewruk@gmail.com>
 
 # ARG from docker-compose
 ARG image_cookbook_dir
+ARG image_build_dir
 ARG MYSQL_VERSION
 
 # ARG build

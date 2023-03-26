@@ -18,6 +18,7 @@ declare -A alias_collection=(
     [service-restart]="/etc/restart.sh"
 )
 
-for alias in ${!alias_collection[*]}; do
-    echo "alias ${alias}=${alias_collection[${alias}]}" >> ~/.bash_aliases
+for key in "${!alias_collection[@]}"
+do
+    echo "alias $key='${alias_collection[$key]}'" >> ~/.bash_aliases
 done

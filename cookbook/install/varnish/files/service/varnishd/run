@@ -2,19 +2,8 @@
 
 set -e
 
-# Maximum number of open files (for ulimit -n)
 NFILES=131072
-
-# Maximum locked memory size (for ulimit -l)
-# Used for locking the shared memory log in memory.  If you increase log size,
-# you need to increase this number as well
-#MEMLOCK=82000
-
-# Open files (usually 1024, which is way too small for varnish)
 ulimit -n ${NFILES:-131072}
-
-# Maxiumum locked memory size for shared memory log
-#ulimit -l ${MEMLOCK:-82000}
 
 if [ ! -v VARNISH_CONFIG ]; then
     VARNISH_CONFIG="default"

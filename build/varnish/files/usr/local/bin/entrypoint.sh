@@ -4,7 +4,7 @@ set -e
 
 if [ ! -f "/etc/scripts.env" ]; then
     touch /etc/scripts.env
-    echo "export a_set_traefik_config=1" >> /etc/scripts.env
+    echo "export a_configure_mysql=1" >> /etc/scripts.env
 fi
 source /etc/scripts.env
 

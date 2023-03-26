@@ -7,7 +7,6 @@ if [ ! -f "/etc/scripts.env" ]; then
     echo "export a_configure_mysql=1" >> /etc/scripts.env
     echo "export b_configure_php=1" >> /etc/scripts.env
 fi
-
 source /etc/scripts.env
 
 env_array=( $(env | sort) )
@@ -19,6 +18,6 @@ for var in "${env_array[@]}"; do
         [ -x "${entrypoint_scripts_path}${env_name}.sh" ] && "${entrypoint_scripts_path}${env_name}.sh"
     fi
 done
-
 source /etc/scripts.env
+
 exec s6-svscan -t0 /service

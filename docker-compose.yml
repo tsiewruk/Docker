@@ -124,6 +124,20 @@ services:
     stdin_open: true
     tty: true
 
+  telegraf:
+    build:
+      context: .
+      args:
+        image_cookbook_dir: ./cookbook
+        image_build_dir: ./build/telegraf
+        INFLUXDB_URL: <TO_FILL>
+        INFLUXDB_USERNAME: <TO_FILL>
+        INFLUXDB_PASSWORD: <TO_FILL>
+      dockerfile: build/terraform/Dockerfile
+    image: "telegraf:latest"
+    stdin_open: true
+    tty: true
+
   mysql:
     build:
       context: .

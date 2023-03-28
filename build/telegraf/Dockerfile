@@ -18,7 +18,6 @@ COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"
 
 # additional requirements
 RUN chmod 777 /tmp
-# install requirements
 # install telegraf
 RUN "${TMP_FILES_DIR}/install/telegraf/telegraf-install.sh"
 # clean up

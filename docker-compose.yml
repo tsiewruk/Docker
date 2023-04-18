@@ -152,13 +152,29 @@ services:
     volumes:
       - mysql_db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=mysql
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=<password>
+      - MYSQL_DATABASE=<mysql>
+      - MYSQL_USER=<root>
+      - MYSQL_PASSWORD=<password>
     expose:
       - 3306
       - 33060
 
   volumes:
     mysql_db:
+
+  docker-registry:
+    restart: always
+    image: registry:2
+    ports:
+      - 5000:5000
+#    environment:
+#      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.crt
+#      REGISTRY_HTTP_TLS_KEY: /certs/domain.key
+#      REGISTRY_AUTH: htpasswd
+#      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+#      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+    volumes:
+      - /<path_to_registry>:/var/lib/registry
+#      - /path/certs:/certs
+#      - /path/auth:/auth

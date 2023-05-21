@@ -7,9 +7,7 @@ source "${source_dir}/../../../source/font.sh"
 
 cp -R "${source_dir/files/service}" /
 
-MYSQL_VERSION="${1}"
-
-echo-info "Installing Mysql"
+echo-info "Installing Memcache"
 
 apt-get -y update
-apt-get -y install --no-install-recommends "mysql-server=${MYSQL_VERSION}"
+apt-get -y install --no-install-recommends memcached

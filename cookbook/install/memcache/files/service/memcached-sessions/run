@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -e
+
+exec s6-setuidgid memcache /usr/bin/memcached -m 64 -p 11210 -u memcache

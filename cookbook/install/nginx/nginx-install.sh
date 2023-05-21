@@ -9,7 +9,6 @@ cp -R "${source_dir/files/service}" /
 
 echo-info "Installing NGINX"
 
-
 "${source_dir}/../../set/os/check_os.sh" "${CHECK_OS}" "${CHECK_RELEASE}"
 
 apt-get update

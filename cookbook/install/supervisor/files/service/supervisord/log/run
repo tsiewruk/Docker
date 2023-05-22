@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+logdir=/var/log/supervisord
+[ -d $logdir ] || { mkdir -p $logdir ; }
+chown -R nobody $logdir
+exec s6-setuidgid nobody s6-log t $logdir

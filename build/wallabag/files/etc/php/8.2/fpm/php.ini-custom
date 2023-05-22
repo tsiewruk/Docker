@@ -48,17 +48,6 @@ date.timezone = "Europe/Warsaw"
 session.save_handler = memcached
 session.save_path = "memcache_session:11211"
 
-[opcache]
-zend_extension = opcache.so
-opcache.enable = 1
-opcache.enable_cli = 1
-opcache.memory_consumption = 512
-opcache.interned_strings_buffer = 8
-opcache.max_accelerated_files = 32531
-opcache.revalidate_freq = 2
-opcache.fast_shutdown = 1
-opcache.blacklist_filename = "/etc/php/opcache_blacklist.list"
-
 [igbinary]
 igbinary.compact_strings=On
 apc.serializer=igbinary

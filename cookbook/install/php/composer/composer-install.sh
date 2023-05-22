@@ -3,7 +3,7 @@
 set -e
 
 source_dir="$(dirname $(readlink -f "$0"))"
-source "${source_dir}/../../source/font.sh"
+source "${source_dir}/../../../source/font.sh"
 
 PHP_COMPOSER_VERSION="${1}"
 

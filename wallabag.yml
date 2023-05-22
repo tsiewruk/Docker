@@ -26,6 +26,34 @@ services:
     tty: true
     ports:
       - 80:80
-#    depends_on:
-#      - db
-#      - rabbitmq
+    depends_on:
+      - db
+      - rabbitmq
+    volumes:
+      - wallabag_data:/var/www/wallabag/data
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wallabag
+      MYSQL_USER: wallabag
+      MYSQL_PASSWORD: wallabag
+    volumes:
+      - db_data:/var/lib/mysql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  volumes:
+    wallabag_data:
+    db_data:
+    rabbitmq_data:

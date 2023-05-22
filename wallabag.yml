@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  ubuntu-base:
+    build:
+      context: .
+      args:
+        image_cookbook_dir: ./cookbook
+        image_build_dir: ./build/ubuntu-base
+      dockerfile: build/ubuntu-base/Dockerfile
+    image: "ubuntu-base:latest"
+    stdin_open: true
+    tty: true
+
+  wallabag:
+    build:
+      context: .
+      args:
+        image_cookbook_dir: ./cookbook
+        image_build_dir: ./build/wallabag
+        PHP_VERSION: 8.2
+        PHP_COMPOSER_VERSION: 2.1.9
+      dockerfile: build/wallabag/Dockerfile
+    image: "wallabag:latest"
+    stdin_open: true
+    tty: true
+    ports:
+      - 80:80
+#    depends_on:
+#      - db
+#      - rabbitmq

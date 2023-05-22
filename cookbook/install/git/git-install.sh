@@ -2,7 +2,12 @@
 
 set -e
 
+source_dir="$(dirname $(readlink -f "$0"))"
+source "${source_dir}/../../source/font.sh"
+
 ADD_GIT_DETAILS="${1}"
+
+echo-info "Installing Git"
 
 apt-get -y update
 apt-get -y install --no-install-recommends git

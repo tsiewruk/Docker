@@ -21,7 +21,7 @@ COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"
 COPY "${image_build_dir}/files" /
 
 # install additional requirements
-RUN chmod 777 /tmp
+RUN chmod 777 /tmp \
     && apt-get -y update \
     && apt-get -y install --no-install-recommends \
        g++ libaio1 make dpkg-dev

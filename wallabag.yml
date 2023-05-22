@@ -30,7 +30,7 @@ services:
       - db
       - rabbitmq
     volumes:
-      - wallabag_data:/var/www/wallabag/data
+      - wallabag_data:/srv/http/wallabag
 
   db:
     image: mysql:8
@@ -53,7 +53,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  volumes:
-    wallabag_data:
-    db_data:
-    rabbitmq_data:
+volumes:
+  wallabag_data:
+  db_data:
+  rabbitmq_data:

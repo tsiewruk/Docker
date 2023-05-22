@@ -1,0 +1,66 @@
+;;;;;;;;;;;;;;;;;;;;
+; Language Options ;
+;;;;;;;;;;;;;;;;;;;;
+short_open_tag = Off
+zlib.output_compression = off
+
+;;;;;;;;;;;;;;;;;
+; Miscellaneous ;
+;;;;;;;;;;;;;;;;;
+expose_php = Off
+always_populate_raw_post_data = -1
+
+;;;;;;;;;;;;;;;;;;;
+; Resource Limits ;
+;;;;;;;;;;;;;;;;;;;
+max_input_time = 30
+max_input_vars = 10000
+memory_limit = 1024M
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Error handling and logging ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+log_errors = On
+error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;
+; Paths and Directories ;
+;;;;;;;;;;;;;;;;;;;;;;;;;
+include_path = "/usr/share/pear"
+
+;;;;;;;;;;;;;;;;
+; File Uploads ;
+;;;;;;;;;;;;;;;;
+file_uploads = On
+
+serialize_precision = -1
+
+;;;;;;;;;;;;;;;;;;;
+; Module Settings ;
+;;;;;;;;;;;;;;;;;;;
+[Date]
+date.timezone = "Europe/Warsaw"
+
+[Session]
+session.save_handler = memcached
+session.save_path = "memcache_session:11211"
+
+[opcache]
+zend_extension = opcache.so
+opcache.enable = 1
+opcache.enable_cli = 1
+opcache.memory_consumption = 512
+opcache.interned_strings_buffer = 8
+opcache.max_accelerated_files = 32531
+opcache.revalidate_freq = 2
+opcache.fast_shutdown = 1
+opcache.blacklist_filename = "/etc/php/opcache_blacklist.list"
+
+[igbinary]
+igbinary.compact_strings=On
+apc.serializer=igbinary
+session.serialize_handler=igbinary
+memcached.serializer=igbinary
+
+[php-pear]
+include_path="/usr/share/php:/usr/share/pear"

@@ -28,7 +28,13 @@ RUN "${TMP_FILES_DIR}/install/nginx/nginx-install.sh" \
 # install git
 RUN "${TMP_FILES_DIR}/install/nginx/git-install.sh" "${ADD_GIT_DETAILS}"
 # install php
-
+RUN "${TMP_FILES_DIR}/install/php/fpm/php-install.sh" "${PHP_VERSION}" \
+# install pear extension
+    && "${TMP_FILES_DIR}/install/php/pear/pear-install.sh" "${PHP_VERSION}" \
+# required to start fpm
+    && mkdir -p /var/log/php/
+# install composer
+RUN "${TMP_FILES_DIR}/install/php/composer/composer-install.sh" "${PHP_COMPOSER_VERSION}"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
     && rm -rf "${TMP_FILES_DIR}"

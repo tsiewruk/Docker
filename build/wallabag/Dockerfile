@@ -22,13 +22,14 @@ COPY "${image_build_dir}/files" /
 RUN chmod 777 /tmp
 # install nginx & configure
 RUN "${TMP_FILES_DIR}/install/nginx/nginx-install.sh" \
-    && install -d -o www-data -g www-data -m 755 "${APP_DEPLOY_PATH}" \
     && mv "/etc/nginx/nginx.conf-custom" "/etc/nginx/nginx.conf" \
     && sed -i "s|<DOCUMENT_ROOT>|${APP_DEPLOY_PATH}|g" "/etc/nginx/conf.d/wallabag.conf"
 # install git
 RUN "${TMP_FILES_DIR}/install/nginx/git-install.sh" "${ADD_GIT_DETAILS}"
-# install php
+# install php & configure
 RUN "${TMP_FILES_DIR}/install/php/fpm/php-install.sh" "${PHP_VERSION}" \
+    && mv "/etc/php/${PHP_VERSION}/cli/php.ini-custom" "/etc/php/${PHP_VERSION}/cli/php.ini" \
+    && mv "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf-custom" "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf"
 # install pear extension
     && "${TMP_FILES_DIR}/install/php/pear/pear-install.sh" "${PHP_VERSION}" \
 # required to start fpm

@@ -55,7 +55,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1684695976225</updated>
-      <workItem from="1684695981483" duration="4055000" />
+      <workItem from="1684695981483" duration="4763000" />
     </task>
     <servers />
   </component>
@@ -63,6 +63,7 @@
     <option name="version" value="3" />
   </component>
   <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="Dockerfile" />
     <option featureType="com.intellij.fileTypeFactory" implementationName="docker-compose.yml" />
   </component>
 </project>

@@ -39,6 +39,9 @@ RUN "${TMP_FILES_DIR}/install/php/fpm/php-install.sh" "${PHP_VERSION}" \
                                                   "php${PHP_VERSION}-pdo" \
                                                   "php${PHP_VERSION}-curl" \
                                                   "php${PHP_VERSION}-xml" \
+                                                  "php${PHP_VERSION}-gd" \
+                                                  "php${PHP_VERSION}-intl" \
+                                                  "php${PHP_VERSION}-xsl" \
     && mv "/etc/php/${PHP_VERSION}/cli/php.ini-custom" "/etc/php/${PHP_VERSION}/cli/php.ini" \
     && mv "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf-custom" "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf"
 # install pear extension

@@ -14,7 +14,7 @@ ARG TMP_FILES_DIR='/tmp/cookbook'
 ARG ADD_GIT_DETAILS="true"
 
 # ENV build + image
-ENV APP_DEPLOY_PATH='/srv/http/wallabag'
+ENV APP_DEPLOY_PATH='/srv/http/wallabag/web'
 
 # required files
 COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"

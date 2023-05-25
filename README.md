@@ -8,19 +8,19 @@
   * **source** - contains scripts that are helpers for set or install scripts/
 
 ### How to build an image
-`sudo docker-compose build --no-cache <service_name>`
+`sudo docker compose -f wallabag.yml build --no-cache <service_name>`
 
 ### How to enable the image container should be done
-`sudo docker-compose up <service_name>`
+`sudo docker compose -f wallabag.yml up <service_name>`
 
 ### How to Check Container Status.
-`sudo docker-compose ps`
+`sudo docker compose -f wallabag.yml ps`
 
 ### How to connect to a container.
-`sudo docker-compose exec <service_name> bash`
+`sudo docker compose exec <service_name> bash`
 
 ### How to stop the container.
-`sudo docker-compose stop <service_name>`
+`sudo docker compose -f wallabag.yml stop <service_name>`
 
 ### How to delete a container
-`sudo docker-compose rm <service_name>`
+`sudo docker compose -f wallabag.yml rm <service_name>`

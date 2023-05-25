@@ -5,7 +5,7 @@ set -e
 if [ ! -f "/etc/scripts.env" ]; then
     touch /etc/scripts.env
     echo "export a_deploy_app=1" >> /etc/scripts.env
-    echo "export b_configure_rabbit=1" >> /etc/scripts.env
+    echo "export b_configure_app=1" >> /etc/scripts.env
 fi
 source /etc/scripts.env
 

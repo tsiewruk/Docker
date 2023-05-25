@@ -56,7 +56,6 @@ RUN "${TMP_FILES_DIR}/install/php/composer/composer-install.sh" "${PHP_COMPOSER_
 # install yarn
 RUN "${TMP_FILES_DIR}/install/yarn/yarn-install.sh"
 # clean up
-RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
-    && rm -f "/tmp/cookbook"
+RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh"
 
 ENTRYPOINT ["entrypoint.sh"]

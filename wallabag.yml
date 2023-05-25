@@ -33,7 +33,7 @@ services:
       - SYMFONY__ENV__DATABASE_CHARSET=utf8mb4
       - SYMFONY__ENV__DATABASE_TABLE_PREFIX="wallabag_"
       - SYMFONY__ENV__FROM_EMAIL=wallabag@wallabag.com
-      - SYMFONY__ENV__DOMAIN_NAME=https://wallabag.pl
+      - SYMFONY__ENV__DOMAIN_NAME=http://localhost
       - SYMFONY__ENV__SERVER_NAME="Wallabag"
     stdin_open: true
     tty: true

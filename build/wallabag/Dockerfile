@@ -53,8 +53,10 @@ RUN "${TMP_FILES_DIR}/install/php/pear/pear-install.sh" "${PHP_VERSION}" \
     && mkdir -p /var/log/php/
 # install composer
 RUN "${TMP_FILES_DIR}/install/php/composer/composer-install.sh" "${PHP_COMPOSER_VERSION}"
+# install yarn
+RUN "${TMP_FILES_DIR}/install/yarn/yarn-install.sh"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
-    && rm -rf "${TMP_FILES_DIR}"
+    && rm -f "/tmp/cookbook"
 
 ENTRYPOINT ["entrypoint.sh"]

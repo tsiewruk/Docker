@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -e
+
+exec vault server -config=/etc/vault/config/config.hcl

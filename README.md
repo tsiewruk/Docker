@@ -17,7 +17,7 @@
 `sudo docker compose -f wallabag.yml ps`
 
 ### How to connect to a container.
-`sudo docker compose exec <service_name> bash`
+`sudo docker compose -f wallabag.yml exec <service_name> bash`
 
 ### How to stop the container.
 `sudo docker compose -f wallabag.yml stop <service_name>`

@@ -16,7 +16,7 @@ ARG TMP_FILES_DIR='/tmp/cookbook/'
 
 # required files
 COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"
-#COPY "${image_build_dir}/files" /
+COPY "${image_build_dir}/files" /
 
 # additional requirements
 RUN chmod 777 /tmp

@@ -12,22 +12,24 @@ services:
     stdin_open: true
     tty: true
 
-  ansible:
+  service-deploy:
     build:
       context: .
       args:
         image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/ansible
+        image_build_dir: ./build/service-deploy
         ANSIBLE_VERSION: 2.9
         PYTHON_VERSION: 3.9
-      dockerfile: build/ansible/Dockerfile
-    image: "ansible:latest"
+      dockerfile: build/service-deploy/Dockerfile
+    image: "service-deploy:latest"
+    hostname: service-deploy
+    container_name: service-deploy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ansible.rule=Host(`ansible.dev`)"
-      - "traefik.http.routers.ansible.service=ansible"
-      - "traefik.http.routers.ansible.tls=true"
-      - "traefik.http.services.ansible.loadbalancer.server.port=80"
+      - "traefik.http.routers.service-deploy.rule=Host(`service-deploy.dev`)"
+      - "traefik.http.routers.service-deploy.service=service-deploy"
+      - "traefik.http.routers.service-deploy.tls=true"
+      - "traefik.http.services.service-deploy.loadbalancer.server.port=80"
     stdin_open: true
     tty: true
 

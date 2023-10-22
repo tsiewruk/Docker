@@ -20,16 +20,11 @@ services:
         image_build_dir: ./build/service-deploy
         ANSIBLE_VERSION: 2.9
         PYTHON_VERSION: 3.9
+        TERRAFORM_VERSION: 1.3.7
       dockerfile: build/service-deploy/Dockerfile
     image: "service-deploy:latest"
     hostname: service-deploy
     container_name: service-deploy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.service-deploy.rule=Host(`service-deploy.dev`)"
-      - "traefik.http.routers.service-deploy.service=service-deploy"
-      - "traefik.http.routers.service-deploy.tls=true"
-      - "traefik.http.services.service-deploy.loadbalancer.server.port=80"
     stdin_open: true
     tty: true
 
@@ -105,24 +100,6 @@ services:
 #      - "traefik.http.routers.rabbitmq.service=rabbitmq"
 #      - "traefik.http.routers.rabbitmq.tls=true"
 #      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
-    stdin_open: true
-    tty: true
-
-  terraform:
-    build:
-      context: .
-      args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/terraform
-        TERRAFORM_VERSION: 1.3.7
-      dockerfile: build/terraform/Dockerfile
-    image: "terraform:latest"
-#   labels:
-#     - "traefik.enable=true"
-#     - "traefik.http.routers.terraform.rule=Host(`terraform.dev`)"
-#     - "traefik.http.routers.terraform.service=terraform"
-#     - "traefik.http.routers.terraform.tls=true"
-#     - "traefik.http.services.teraform.loadbalancer.server.port=80"
     stdin_open: true
     tty: true
 

@@ -24,6 +24,12 @@ RUN chmod 777 /tmp
 RUN "${TMP_FILES_DIR}/install/openssh/server/openssh-install.sh"
 # install ansible
 RUN "${TMP_FILES_DIR}/install/ansible/ansible-install.sh" "${ANSIBLE_VERSION}" "${PYTHON_VERSION}"
+# install terraform
+RUN "${TMP_FILES_DIR}/install/terraform/terraform-install.sh" "${TERRAFORM_VERSION}"
+# install azure-cli
+RUN "${TMP_FILES_DIR}/install/azure-cli/azure-cli-install.sh"
 # clean up
 RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
-    && rm -rf "${TMP_FILES_DIR}"
+    && rm -rf "${TMP_FILES_DIR}" 
+
+ENTRYPOINT ["entrypoint.sh"]

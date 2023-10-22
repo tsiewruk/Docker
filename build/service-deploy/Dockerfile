@@ -7,6 +7,7 @@ ARG image_cookbook_dir
 ARG image_build_dir
 ARG ANSIBLE_VERSION
 ARG PYTHON_VERSION
+ARG TERRAFORM_VERSION
 
 # ARG build
 ARG DEBIAN_FRONTEND='noineractive'

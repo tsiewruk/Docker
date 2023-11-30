@@ -9,11 +9,11 @@ ARG ANSIBLE_VERSION
 ARG PYTHON_VERSION
 ARG TERRAFORM_VERSION
 
-# ARG build
+# ARG 
 ARG DEBIAN_FRONTEND='noineractive'
 ARG TMP_FILES_DIR='/tmp/cookbook/'
 
-# ENV build + image
+# ENV 
 
 # required files
 COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"
@@ -29,8 +29,9 @@ RUN "${TMP_FILES_DIR}/install/ansible/ansible-install.sh" "${ANSIBLE_VERSION}" "
 RUN "${TMP_FILES_DIR}/install/terraform/terraform-install.sh" "${TERRAFORM_VERSION}"
 # install azure-cli
 RUN "${TMP_FILES_DIR}/install/azure-cli/azure-cli-install.sh"
-# clean up
-RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
-    && rm -rf "${TMP_FILES_DIR}" 
+# clean up build
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
+# clean up tmp files
+RUN rm -rf "${TMP_COOKBOOKS_DIR}"
 
 ENTRYPOINT ["entrypoint.sh"]

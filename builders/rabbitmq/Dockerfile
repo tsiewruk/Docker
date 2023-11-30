@@ -31,9 +31,9 @@ RUN "${TMP_FILES_DIR}/install/ssl/ssl-install.sh" "${SSL_VERSION}"
 RUN "${TMP_FILES_DIR}/install/erlang/erlang-install.sh" "${UBUNTU_RELEASE}"
 # install rabbitmq
 RUN "${TMP_FILES_DIR}/install/rabbitmq/rabbitmq-install.sh" "${UBUNTU_RELEASE}"
-# clean up
-RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
-    && rm -rf "${TMP_FILES_DIR}" \
-    && apt-get purge -y dpkg-dev
+# clean up build
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
+# clean up tmp files
+RUN rm -rf "${TMP_COOKBOOKS_DIR}"
 
 ENTRYPOINT ["entrypoint.sh"]

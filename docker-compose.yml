@@ -1,14 +1,18 @@
 version: "3.7"
 
+networks:
+  default:
+    driver: bridge
+
 services:
   ubuntu-base:
     build:
       context: .
       args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/ubuntu-base
-      dockerfile: build/ubuntu-base/Dockerfile
-    image: "ubuntu-base:latest"
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/ubuntu-base
+      dockerfile: builders/ubuntu-base/Dockerfile
+    image: "ubuntu-base:new"
     stdin_open: true
     tty: true
 

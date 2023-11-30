@@ -1,10 +1,10 @@
 FROM ubuntu:22.04
 
-# IN params from docker-compose
+# ARG from docker-compose
 ARG cookbooks_dir
 ARG image_builder_dir
 
-# IN params local for builder
+# ARG
 ARG DEBIAN_FRONTEND='noninteractive'
 ARG TMP_COOKBOOKS_DIR='/tmp/cookbook'
 ARG TZ='Europe/Warsaw'

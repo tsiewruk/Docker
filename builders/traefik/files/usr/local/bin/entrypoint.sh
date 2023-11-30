@@ -1,12 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -e
 
-if [ ! -f "/etc/scripts.env" ]; then
-    touch /etc/scripts.env
-    echo "export a_set_traefik_config=1" >> /etc/scripts.env
+if [ ! -f "/etc/entrypoint-scripts.env" ]; then
+    touch /etc/entrypoint-scripts.env
+    echo "export a_configure_mysql=1" >> /etc/entrypoint-scripts.env
 fi
-source /etc/scripts.env
+. /etc/entrypoint-scripts.env
 
 env_array=( $(env | sort) )
 entrypoint_scripts_path='/usr/local/bin/entrypoint-scripts/'
@@ -17,6 +17,6 @@ for var in "${env_array[@]}"; do
         [ -x "${entrypoint_scripts_path}${env_name}.sh" ] && "${entrypoint_scripts_path}${env_name}.sh"
     fi
 done
-source /etc/scripts.env
+. /etc/entrypoint-scripts.env
 
 exec s6-svscan -t0 /service

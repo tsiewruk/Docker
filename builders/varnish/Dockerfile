@@ -1,16 +1,14 @@
-FROM ubuntu-base:latest
-
-MAINTAINER Tomasz Siewruk <tomasz.m.siewruk@gmail.com>
+FROM ubuntu-base:new
 
 # ARG from docker-compose
 ARG image_cookbook_dir
 ARG image_build_dir
 
-# ARG build
+# ARG 
 ARG DEBIAN_FRONTEND='noineractive'
 ARG TMP_FILES_DIR='/tmp/cookbook/'
 
-# ENV build + image
+# ENV
 
 # required files
 COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"
@@ -20,8 +18,9 @@ COPY "${image_build_dir}/files" /
 RUN chmod 777 /tmp
 # install varnish
 RUN "${TMP_FILES_DIR}/install/varnish/varnish-install.sh"
-# clean up
-RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
-    && rm -rf "${TMP_FILES_DIR}"
+# clean up build
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
+# clean up tmp files
+RUN rm -rf "${TMP_COOKBOOKS_DIR}"
 
 ENTRYPOINT ["entrypoint.sh"]

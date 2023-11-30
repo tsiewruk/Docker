@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+pkill sshd || true
+
+mkdir -p -m0755 /var/run/sshd
+
+exec /usr/sbin/sshd -D

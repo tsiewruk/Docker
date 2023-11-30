@@ -12,6 +12,29 @@ services:
     stdin_open: true
     tty: true
 
+  traefik:
+    build:
+      context: .
+      args:
+        image_cookbook_dir: ./cookbook
+        image_build_dir: ./build/traefik
+        TRAEFIK_VERSION: 2.9.6
+      dockerfile: build/traefik/Dockerfile
+    image: "traefik:latest"
+    environment:
+      - TRAEFIK_CONFIG= default
+    ports:
+      - "80:80"
+      - "443:443"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.dev`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.traefik.tls=true"
+    stdin_open: true
+    tty: true
+
+
   service-deploy:
     build:
       context: .
@@ -38,28 +61,6 @@ services:
     image: "varnish:latest"
     environment:
       - VARNISH_CONFIG=default
-    stdin_open: true
-    tty: true
-
-  traefik:
-    build:
-      context: .
-      args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/traefik
-        TRAEFIK_VERSION: 2.9.6
-      dockerfile: build/traefik/Dockerfile
-    image: "traefik:latest"
-    environment:
-      - TRAEFIK_CONFIG= default
-    ports:
-      - "80:80"
-      - "443:443"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.dev`)"
-      - "traefik.http.routers.api.service=api@internal"
-      - "traefik.http.routers.traefik.tls=true"
     stdin_open: true
     tty: true
 
@@ -102,45 +103,6 @@ services:
 #      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
     stdin_open: true
     tty: true
-
-  telegraf:
-    build:
-      context: .
-      args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/telegraf
-        INFLUXDB_URL: <TO_FILL>
-        INFLUXDB_USERNAME: <TO_FILL>
-        INFLUXDB_PASSWORD: <TO_FILL>
-      dockerfile: build/terraform/Dockerfile
-    image: "telegraf:latest"
-    stdin_open: true
-    tty: true
-
-  mysql:
-    build:
-      context: .
-      args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/mysql
-        MYSQL_VERSION: 8
-      dockerfile: build/mysql/Dockerfile
-    image: "mysql:latest"
-    stdin_open: true
-    tty: true
-    volumes:
-      - mysql_db:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=<password>
-      - MYSQL_DATABASE=<mysql>
-      - MYSQL_USER=<root>
-      - MYSQL_PASSWORD=<password>
-    expose:
-      - 3306
-      - 33060
-
-  volumes:
-    mysql_db:
 
   docker-registry:
     restart: always

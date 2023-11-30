@@ -1,36 +1,31 @@
 FROM ubuntu:22.04
 
-# ARG from docker-compose
-ARG image_cookbook_dir
-ARG image_build_dir
+# IN params from docker-compose
+ARG cookbooks_dir
+ARG image_builder_dir
 
-# ARG build
-ARG DEBIAN_FRONTEND='noineractive'
-ARG TMP_FILES_DIR='/tmp/cookbook/'
-ARG TIMEZONE='Europe/Warsaw'
-
-# ENV build + image
+# IN params local for builder
+ARG DEBIAN_FRONTEND='noninteractive'
+ARG TMP_COOKBOOKS_DIR='/tmp/cookbook'
+ARG TZ='Europe/Warsaw'
 
 # required files
-COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"
-COPY "${image_build_dir}/files" /
+COPY "${cookbooks_dir}" "${TMP_COOKBOOKS_DIR}"
+COPY "${image_builder_dir}/files" /
 
 # additional requirements
 RUN chmod 777 /tmp && apt-get update -y && apt-get upgrade -y
 # install requirements
-RUN apt-get install -y --no-install-recommends \
-       less vim tail \
-       ca-certificates gnupg tzdata \
-       s6 sudo htop locales logrotate strace iftop \
-       bash-completion dialog \
+RUN apt-get -y install --no-install-recommends \
+       less vim tzdata \
+       ca-certificates gnupg \
+       s6 sudo htop locales logrotate \
+       bash-completion dialog procps \
        rsync telnet net-tools iputils-ping curl wget zip \
        apt-utils apt-transport-https lsb-release software-properties-common
 # set timezone
-RUN "${TMP_FILES_DIR}/set/timezone/set-timezone.sh" "${TIMEZONE}"
+RUN "${TMP_COOKBOOKS_DIR}/setters/timezone/timezone-set.sh" "${TZ}"
 # set locals
 RUN locale-gen en_US.UTF-8 pl_PL.UTF-8
-# set alias
-RUN "${TMP_FILES_DIR}/set/alias/set-alias.sh"
-# clean up
-RUN "${TMP_FILES_DIR}/set/clean/clean-build.sh" \
-    && rm -rf "${TMP_FILES_DIR}"
+# clean up files
+RUN rm -rf "${TMP_COOKBOOKS_DIR}"

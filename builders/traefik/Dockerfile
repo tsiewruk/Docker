@@ -4,6 +4,7 @@ FROM ubuntu-base:latest
 ARG image_cookbook_dir
 ARG image_build_dir
 ARG TRAEFIK_VERSION
+ARG CERT_CONFIG
 
 # ARG 
 ARG DEBIAN_FRONTEND='noineractive'

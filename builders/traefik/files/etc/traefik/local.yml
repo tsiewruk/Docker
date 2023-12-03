@@ -32,16 +32,16 @@ tls:
   stores:
     default:
       defaultCertificate:
-        certFile: /etc/certs/mydomain.crt
-        keyFile: /etc/certs/mydomain.key
+        certFile: /opt/certificates/local.crt
+        keyFile: /opt/certificates/local.key
 
 # Log information
-log:
-  level: ERROR  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-  format: common  # common, json, logfmt
-  filePath: /var/log/traefik/traefik.log
+#log:
+#  level: ERROR  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+#  format: common  # common, json, logfmt
+#  filePath: /var/log/traefik/traefik.log
 
 # Accesslog
-accesslog:
-  format: common  # common, json, logfmt
-  filePath: /var/log/traefik/access.log
+#accesslog:
+#  format: common  # common, json, logfmt
+#  filePath: /var/log/traefik/access.log

@@ -1,0 +1,111 @@
+groups:
+# Host localhost
+  - name: Host `localhost`
+    rules:
+      - alert: Host `localhost` is DOWN!
+        expr: up{instance="node-exporter:9100"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Host `localhost` is down!"
+          description: "Host `localhost` has been down for more than 1 minute."
+
+      - alert: CPU Load
+        expr: 100 - (avg(irate(node_cpu_seconds_total{instance="node-exporter:9100",mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Load on `localhost` host"
+          description: "CPU Load on `localhost` host has been greater than 80% for 5 minutes"
+
+      - alert: Memory Usage
+        expr: (node_memory_Active_bytes{instance="node-exporter:9100"} / node_memory_MemTotal_bytes{instance="node-exporter:9100"}) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memory usage on `localhost` host"
+          description: "Memory usage on `localhost` host has been greater than 80% for 5 minutes"
+
+      - alert: Disk Space
+        expr: ((node_filesystem_size_bytes{instance="node-exporter:9100"} - node_filesystem_free_bytes{instance="node-exporter:9100"}) / node_filesystem_size_bytes{instance="node-exporter:9100"} * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk Space on `localhost` host"
+          description: "Disk Space on `localhost` host has been greater than 80% for 5 minutes"
+
+      - alert: Disk Writes
+        expr: rate(node_disk_writes_completed_total{instance="node-exporter:9100"}[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk Writes on `localhost` host"
+          description: "Disk Writes on `localhost` host has been greater than 100% for 5 minutes"
+
+      - alert: Disk Reads
+        expr: rate(node_disk_reads_completed_total{instance="node-exporter:9100"}[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk Reads on `localhost` host"
+          description: "Disk Reads on `localhost` host has been greater than 100% for 5 minutes"
+
+      - alert: Container "alert-manager" is DOWN!
+        expr: absent(container_start_time_seconds{name="alert-manager"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container 'alert-manager' is down!"
+          description: "Container 'alert-manager' has been down for more than 5 minutes."
+
+      - alert: Container "cadvisor" is DOWN!
+        expr: absent(container_start_time_seconds{name="cadvisor"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container 'cadvisor' is down!"
+          description: "Container 'cadvisor' has been down for more than 5 minutes."
+
+      - alert: Container "node-exporter" is DOWN!
+        expr: absent(container_start_time_seconds{name="node-exporter"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container 'node-exporter' is down!"
+          description: "Container 'node-exporter' has been down for more than 5 minutes."
+
+      - alert: Container "grafana" is DOWN!
+        expr: absent(container_start_time_seconds{name="grafana"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container 'grafana' is down!"
+          description: "Container 'grafana' has been down for more than 5 minutes."
+
+      - alert: Container "prometheus" is DOWN!
+        expr: absent(container_start_time_seconds{name="prometheus"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container 'prometheus' is down!"
+          description: "Container 'prometheus' has been down for more than 5 minutes."
+
+      - alert: Container "traefik" is DOWN!
+        expr: absent(container_start_time_seconds{name="traefik"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container 'traefik' is down!"
+          description: "Container 'traefik' has been down for more than 5 minutes."

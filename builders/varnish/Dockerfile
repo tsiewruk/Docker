@@ -8,8 +8,6 @@ ARG image_build_dir
 ARG DEBIAN_FRONTEND='noineractive'
 ARG TMP_FILES_DIR='/tmp/cookbook/'
 
-# ENV
-
 # required files
 COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"
 COPY "${image_build_dir}/files" /

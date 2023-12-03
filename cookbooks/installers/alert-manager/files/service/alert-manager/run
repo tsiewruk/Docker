@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+exec alertmanager --config.file=/etc/alert-manager/alertmanager.yml

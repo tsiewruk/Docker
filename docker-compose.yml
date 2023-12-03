@@ -12,7 +12,7 @@ services:
         cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/ubuntu-base
       dockerfile: builders/ubuntu-base/Dockerfile
-    image: "ubuntu-base:new"
+    image: "ubuntu-base:latest"
     stdin_open: true
     tty: true
 
@@ -20,21 +20,27 @@ services:
     build:
       context: .
       args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/traefik
-        TRAEFIK_VERSION: 2.9.6
-      dockerfile: build/traefik/Dockerfile
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/traefik
+        TRAEFIK_VERSION: '2.10.4'
+      dockerfile: builders/traefik/Dockerfile
     image: "traefik:latest"
+    container_name: traefik
+    hostname: traefik
     environment:
-      - TRAEFIK_CONFIG= default
+      - TRAEFIK_CONFIG=local
+      - CERT_CONFIG=local 
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.dev`)"
-      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.local`)" 
+      - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.priority=1"
     stdin_open: true
     tty: true
 

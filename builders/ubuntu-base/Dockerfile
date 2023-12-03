@@ -27,5 +27,5 @@ RUN apt-get -y install --no-install-recommends \
 RUN "${TMP_COOKBOOKS_DIR}/setters/timezone/timezone-set.sh" "${TZ}"
 # set locals
 RUN locale-gen en_US.UTF-8 pl_PL.UTF-8
-# clean up files
+# clean up tmp files
 RUN rm -rf "${TMP_COOKBOOKS_DIR}"

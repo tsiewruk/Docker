@@ -4,6 +4,10 @@ networks:
   default:
     driver: bridge
 
+volumes:
+  jenkins_volume:
+    external: true
+
 services:
   ubuntu-base:
     build:
@@ -72,6 +76,8 @@ services:
     image: "jenkins:latest"
     hostname: jenkins
     container_name: jenkins
+    volumes:
+      - jenkins_volume:/var/jenkins_home
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jenkins.rule=Host(`jenkins.local`)"

@@ -76,6 +76,8 @@ services:
     image: "jenkins:latest"
     hostname: jenkins
     container_name: jenkins
+    ports:
+      - "8081:8081"
     volumes:
       - jenkins_volume:/var/jenkins_home
     labels:

@@ -1,4 +1,4 @@
-FROM ubuntu-base:new
+FROM ubuntu-base:latest
 
 # ARG from docker-compose
 ARG cookbooks_dir
@@ -8,17 +8,14 @@ ARG JENKINS_VERSION
 
 # ARG
 ARG DEBIAN_FRONTEND='noninteractive'
-ARG TMP_COOKBOOKS_DIR='/tmp/cookbook'
-ARG TZ='Europe/Warsaw'
-
-# ENV
+ARG TMP_COOKBOOKS_DIR='/tmp/cookbooks'
 
 # required files
 COPY "${cookbooks_dir}" "${TMP_COOKBOOKS_DIR}"
 COPY "${image_builder_dir}/files" /
 
 # install requirements
-RUN chmod 777 /tmp 
+RUN chmod 777 /tmp
 # install open-jdk
 RUN "${TMP_COOKBOOKS_DIR}/installers/open-jdk/openjdk-install.sh" "${OPEN_JDK_VERSION}"
 # install jenkins

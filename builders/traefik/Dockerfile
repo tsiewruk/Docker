@@ -1,8 +1,8 @@
 FROM ubuntu-base:latest
 
 # ARG from docker-compose
-ARG image_cookbook_dir
-ARG image_build_dir
+ARG cookbooks_dir
+ARG image_builder_dir
 ARG TRAEFIK_VERSION
 ARG CERT_CONFIG
 
@@ -13,8 +13,8 @@ ARG TMP_FILES_DIR='/tmp/cookbook/'
 # ENV
 
 # required files
-COPY "${image_cookbook_dir}" "${TMP_FILES_DIR}"
-COPY "${image_build_dir}/files" /
+COPY "${cookbooks_dir}" "${TMP_COOKBOOKS_DIR}"
+COPY "${image_builder_dir}/files" /
 
 # additional requirements
 RUN chmod 777 /tmp

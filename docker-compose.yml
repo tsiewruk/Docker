@@ -80,7 +80,7 @@ services:
       - "8080:8080"
       - "50000:50000"
     volumes:
-      - jenkins_volume:/var/cache/jenkins/war/
+      - jenkins_volume:/root/.jenkins
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jenkins.rule=Host(`jenkins.local`)"

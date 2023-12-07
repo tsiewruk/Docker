@@ -19,9 +19,9 @@ COPY "${image_builder_dir}/files" /
 # additional requirements
 RUN chmod 777 /tmp
 # install openssh-server
-RUN "${TMP_FILES_DIR}/install/openssh/server/openssh-install.sh"
+RUN "${TMP_COOKBOOKS_DIR}/installers/openssh/server/openssh-install.sh"
 # install traefik
-RUN "${TMP_FILES_DIR}/install/traefik/traefik-install.sh" "${TRAEFIK_VERSION}"
+RUN "${TMP_COOKBOOKS_DIR}/installers/traefik/traefik-install.sh" "${TRAEFIK_VERSION}"
 # clean up build
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
 # clean up tmp files

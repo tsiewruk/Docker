@@ -32,8 +32,8 @@ tls:
   stores:
     default:
       defaultCertificate:
-        certFile: /opt/certificates/local.crt
-        keyFile: /opt/certificates/local.key
+        certFile: /opt/certificates/local/local.crt
+        keyFile: /opt/certificates/local/local.key
 
 # Log information
 #log:

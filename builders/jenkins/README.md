@@ -4,6 +4,6 @@
 `docker volume create jenkins-volume`
 2. Start container
 `docker compose up -d jenkins`
-1. Check Jenkins temp admin password.
+3. Check Jenkins temp admin password.
 `docker container logs jenkins`
-1. Go to website localhost:8080 configure the service
+4. Go to website localhost:8080 and configure the service

@@ -1,43 +1,22 @@
 version: "3.7"
 
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  jenkins_volume:
+    external: true
+
 services:
   ubuntu-base:
     build:
       context: .
       args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/ubuntu-base
-      dockerfile: build/ubuntu-base/Dockerfile
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/ubuntu-base
+      dockerfile: builders/ubuntu-base/Dockerfile
     image: "ubuntu-base:latest"
-    stdin_open: true
-    tty: true
-
-  service-deploy:
-    build:
-      context: .
-      args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/service-deploy
-        ANSIBLE_VERSION: 2.9
-        PYTHON_VERSION: 3.9
-        TERRAFORM_VERSION: 1.3.7
-      dockerfile: build/service-deploy/Dockerfile
-    image: "service-deploy:latest"
-    hostname: service-deploy
-    container_name: service-deploy
-    stdin_open: true
-    tty: true
-
-  varnish:
-    build:
-      context: .
-      args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/varnish
-      dockerfile: build/varnish/Dockerfile
-    image: "varnish:latest"
-    environment:
-      - VARNISH_CONFIG=default
     stdin_open: true
     tty: true
 
@@ -45,40 +24,82 @@ services:
     build:
       context: .
       args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/traefik
-        TRAEFIK_VERSION: 2.9.6
-      dockerfile: build/traefik/Dockerfile
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/traefik
+        TRAEFIK_VERSION: '2.10.4'
+      dockerfile: builders/traefik/Dockerfile
     image: "traefik:latest"
+    container_name: traefik
+    hostname: traefik
     environment:
-      - TRAEFIK_CONFIG= default
+      - TRAEFIK_CONFIG=local
+      - CERT_CONFIG=local 
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.dev`)"
-      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.local`)" 
+      - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.priority=1"
     stdin_open: true
     tty: true
 
-  zabbix:
+  service-deploy:
     build:
       context: .
       args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/zabbix
-        ZABBIX_VERSION: 6.0.4
-        MYSQL_VERSION: 7.4
-      dockerfile: build/varnish/Dockerfile
-    image: "zabbix:latest"
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.http.routers.zabbix.rule=Host(`zabbix.dev`)"
-#      - "traefik.http.routers.zabbix.service=zabbix"
-#      - "traefik.http.routers.zabbix.tls=true"
-#      - "traefik.http.services.zabbix.loadbalancer.server.port=80"
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/service-deploy
+        ANSIBLE_VERSION: 2.9
+        PYTHON_VERSION: 3.9
+        TERRAFORM_VERSION: 1.3.7
+      dockerfile: builders/service-deploy/Dockerfile
+    image: "service-deploy:latest"
+    hostname: service-deploy
+    container_name: service-deploy
+    stdin_open: true
+    tty: true
+
+  jenkins:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/jenkins
+        OPEN_JDK_VERSION: 17
+        JENKINS_VERSION: 1
+      dockerfile: builders/jenkins/Dockerfile
+    image: "jenkins:latest"
+    hostname: jenkins
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_volume:/root/.jenkins
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jenkins.rule=Host(`jenkins.local`)"
+      - "traefik.http.routers.jenkins.service=jenkins"
+      - "traefik.http.routers.jenkins.tls=true"
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+    stdin_open: true
+    tty: true
+
+  varnish:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/varnish
+      dockerfile: builders/varnish/Dockerfile
+    image: "varnish:latest"
+    environment:
+      - VARNISH_CONFIG=default
     stdin_open: true
     tty: true
 
@@ -86,9 +107,9 @@ services:
     build:
       context: .
       args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/rabbbitmq
-      dockerfile: build/rabbitmq/Dockerfile
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/rabbitmq
+      dockerfile: builders/rabbitmq/Dockerfile
     image: "rabbitmq:latest"
     ports:
       - "5672:5672"
@@ -102,58 +123,3 @@ services:
 #      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
     stdin_open: true
     tty: true
-
-  telegraf:
-    build:
-      context: .
-      args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/telegraf
-        INFLUXDB_URL: <TO_FILL>
-        INFLUXDB_USERNAME: <TO_FILL>
-        INFLUXDB_PASSWORD: <TO_FILL>
-      dockerfile: build/terraform/Dockerfile
-    image: "telegraf:latest"
-    stdin_open: true
-    tty: true
-
-  mysql:
-    build:
-      context: .
-      args:
-        image_cookbook_dir: ./cookbook
-        image_build_dir: ./build/mysql
-        MYSQL_VERSION: 8
-      dockerfile: build/mysql/Dockerfile
-    image: "mysql:latest"
-    stdin_open: true
-    tty: true
-    volumes:
-      - mysql_db:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=<password>
-      - MYSQL_DATABASE=<mysql>
-      - MYSQL_USER=<root>
-      - MYSQL_PASSWORD=<password>
-    expose:
-      - 3306
-      - 33060
-
-  volumes:
-    mysql_db:
-
-  docker-registry:
-    restart: always
-    image: registry:2
-    ports:
-      - 5000:5000
-#    environment:
-#      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.crt
-#      REGISTRY_HTTP_TLS_KEY: /certs/domain.key
-#      REGISTRY_AUTH: htpasswd
-#      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
-#      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
-    volumes:
-      - /<path_to_registry>:/var/lib/registry
-#      - /path/certs:/certs
-#      - /path/auth:/auth

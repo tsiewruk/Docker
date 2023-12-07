@@ -1,0 +1,18 @@
+route:
+  receiver: 'Mail Alert'
+  # group_by: [ alertname ]
+  repeat_interval: 1h
+  group_wait: 15s
+  group_interval: 15s
+
+receivers:
+  - name: 'Mail Alert'
+    email_configs:
+      - smarthost: 'X'
+        auth_username: 'X'
+        auth_password: "X"
+        from: 'X'
+        to: 'X'
+        headers:
+          subject: 'Alert Main'
+        send_resolved: true

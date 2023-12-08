@@ -1,7 +1,5 @@
 FROM ubuntu-base:latest
 
-MAINTAINER Tomasz Siewruk <tomasz.m.siewruk@gmail.com>
-
 # ARG from docker-compose
 ARG cookbooks_dir
 ARG image_builder_dir
@@ -12,8 +10,6 @@ ARG TERRAFORM_VERSION
 # ARG 
 ARG DEBIAN_FRONTEND='noineractive'
 ARG TMP_FILES_DIR='/tmp/cookbook/'
-
-# ENV 
 
 # required files
 COPY "${cookbooks_dir}" "${TMP_COOKBOOKS_DIR}"

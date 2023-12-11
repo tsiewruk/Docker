@@ -10,8 +10,6 @@ ARG CERT_CONFIG
 ARG DEBIAN_FRONTEND='noineractive'
 ARG TMP_FILES_DIR='/tmp/cookbook/'
 
-# ENV
-
 # required files
 COPY "${cookbooks_dir}" "${TMP_COOKBOOKS_DIR}"
 COPY "${image_builder_dir}/files" /

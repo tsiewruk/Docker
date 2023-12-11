@@ -16,6 +16,8 @@ COPY "${image_builder_dir}/files" /
 
 # install requirements
 RUN chmod 777 /tmp
+# install git
+RUN "${TMP_COOKBOOKS_DIR}/installers/git/git-install.sh"
 # install open-jdk
 RUN "${TMP_COOKBOOKS_DIR}/installers/open-jdk/openjdk-install.sh" "${OPEN_JDK_VERSION}"
 # install jenkins

@@ -2,11 +2,15 @@
 
 set -e
 
-. "${TMP_COOKBOOKS_DIR}/helpers/view"
+. "${TMP_COOKBOOKS_DIR}/source/font.sh"
 
-SCRIPT_DIR=$(dirname $(readlink -f "$0"))
+source_dir=$(dirname $(readlink -f "$0"))
 
-cp -R "${SCRIPT_DIR}/files/home/root/." /root/
+####################################
+echo-info "Configure root user"
+####################################
+
+cp -R "${source_dir}/files/home/root/." /root/
 cp "/root/.ssh/id_rsa.pub" "/root/.ssh/authorized_keys"
 
 chmod 755 "/root/.ssh"

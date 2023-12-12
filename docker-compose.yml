@@ -90,6 +90,92 @@ services:
     stdin_open: true
     tty: true
 
+  prometheus:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/prometheus
+        PROMETHEUS_VERSION: 2.47.1
+      dockerfile: builders/prometheus/Dockerfile
+    image: "prometheus:latest"
+    container_name: prometheus
+    hostname: prometheus
+    environment:
+      - CERT_CONFIG=local
+    ports:
+      - "9090:9090"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)" 
+      - "traefik.http.routers.prometheus.service=prometheus"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.priority=10"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    stdin_open: true
+    tty: true
+
+  cadvisor:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/cadvisor
+        CADVISOR_VERSION: 0.47.2
+      dockerfile: builders/cadvisor/Dockerfile
+    image: "cadvisor:latest"
+    container_name: cadvisor
+    hostname: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run:/var/run:ro"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/etc/machine-id:/etc/machine-id:ro"
+      - "/var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro"
+      - "/dev/disk/:/dev/disk"
+      - "/:/rootfs"
+    privileged: true
+    devices:
+      - "/dev/kmsg"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.local`)"
+      - "traefik.http.routers.cadvisor.service=cadvisor"
+      - "traefik.http.routers.cadvisor.tls=true"
+      - "traefik.http.routers.cadvisor.priority=10"
+      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
+    stdin_open: true
+    tty: true
+
+  node-exporter:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/node-exporter
+        NODE_EXPORTER_VERSION: 1.7.0
+      dockerfile: builders/node-exporter/Dockerfile
+    image: "node-exporter:latest"
+    container_name: node-exporter
+    hostname: node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - '/:/host:ro,rslave'
+    pid: host
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.local`)"
+      - "traefik.http.routers.node-exporter.service=node-exporter"
+      - "traefik.http.routers.node-exporter.tls=true"
+      - "traefik.http.routers.node-exporter.priority=10"
+      - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
+    stdin_open: true
+    tty: true
+
   varnish:
     build:
       context: .
@@ -100,6 +186,29 @@ services:
     image: "varnish:latest"
     environment:
       - VARNISH_CONFIG=default
+    stdin_open: true
+    tty: true
+
+  alert-manager:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/alert-manager
+        ALERTMANAGER_VERSION: 0.26.0
+      dockerfile: builders/alert-manager/Dockerfile
+    image: "alert-manager:latest"
+    container_name: alert-manager
+    hostname: alert-manager
+    ports:
+      - "9093:9093"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.alert-manager.rule=Host(`alert-manager.local`)"
+      - "traefik.http.routers.alert-manager.service=alert-manager"
+      - "traefik.http.routers.alert-manager.tls=true"
+      - "traefik.http.routers.alert-manager.priority=10"
+      - "traefik.http.services.alert-manager.loadbalancer.server.port=9093"
     stdin_open: true
     tty: true
 

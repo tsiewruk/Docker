@@ -10,7 +10,7 @@ cp -R "${source_dir}/files/service" /
 PHP_VERSION="${1}"
 
 ####################################
-echo-info "Installing PHP"
+echo-info "Installing PHP version - ${PHP_VERSION}"
 ####################################
 
 # for versions < 7.4 and >= 8.0

@@ -10,7 +10,7 @@ cp -R "${source_dir}/files/service" /
 MYSQL_VERSION="${1}"
 
 ####################################
-echo-info "Installing Mysql"
+echo-info "Installing Mysql version - ${MYSQL_VERSION}"
 ####################################
 
 apt-get -y update

@@ -6,7 +6,9 @@ set -e
 
 PYTHON_VERSION="${1}"
 
-echo-info "Installing Python"
+####################################
+echo-info "Installing Python - ${PYTHON_VERSION}"
+####################################
 
 apt-get update -y
 apt-get install -y --no-install-recommends software-properties-common

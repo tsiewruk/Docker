@@ -7,7 +7,7 @@ set -e
 TERRAFORM_VERSION="${1}"
 
 ####################################
-echo-info "Installing Terraform"
+echo-info "Installing Terraform - ${TERRAFORM_VERSION}"
 ####################################
 
 wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg

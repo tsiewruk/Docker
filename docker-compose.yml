@@ -181,9 +181,9 @@ services:
         cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/wazuh
         WAZUH_VERSION: 4.7
-        INDEXER_NODE_1_IP: localhost
-        WAZUH_MANAGER_NODE_1_IP: localhost
-        DASHBOARD_NODE_1_IP: localhost
+        INDEXER_NODE_1_IP: 127.0.0.1
+        WAZUH_MANAGER_NODE_1_IP: 127.0.0.1
+        DASHBOARD_NODE_1_IP: 127.0.0.1
       dockerfile: builders/wazuh/Dockerfile
     image: "wazuh:latest"
     container_name: wazuh

@@ -4,8 +4,8 @@ set -e
 
 . "${TMP_COOKBOOKS_DIR}/source/font.sh"
 
-source_dir=$(dirname $(readlink -f "$0"))
-cp -R "${source_dir}/files/service" /
+#source_dir=$(dirname $(readlink -f "$0"))
+#cp -R "${source_dir}/files/service" /
 
 WAZUH_VERSION="${1}"
 INDEXER_NODE_1_IP="${2}"
@@ -17,6 +17,7 @@ echo-info "Installing Wazuh (single node) - ${WAZUH_VERSION}"
 ####################################
 
 # initial configuration
+mkdir -p /tmp/wazuh
 cd /tmp/wazuh
 curl -sO https://packages.wazuh.com/${WAZUH_VERSION}/wazuh-install.sh
 curl -sO https://packages.wazuh.com/${WAZUH_VERSION}/config.yml

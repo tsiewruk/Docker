@@ -1,0 +1,162 @@
+version: "3.8"
+
+networks:
+  monitoring-vn:
+    external: true
+
+volumes:
+  alertmanager_volume:
+    external: true
+  grafana_volume:
+    external: true
+  prometheus_volume:
+    external: true
+
+services:
+  alert-manager:
+    image: "alert-manager:latest"
+    container_name: alert-manager
+    hostname: alert-manager
+    restart: unless-stopped
+    cpu_shares: 128
+    mem_limit: 128M 
+#    volumes:
+#      - alertmanager_volume:/data
+    networks:
+      - monitoring-vn
+    ports:
+      - "9093:9093"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.alert-manager.rule=Host(`alert-manager.local`)" 
+      - "traefik.http.routers.alert-manager.service=alert-manager"
+      - "traefik.http.routers.alert-manager.tls=true"
+      - "traefik.http.routers.alert-manager.priority=10"
+      - "traefik.http.services.alert-manager.loadbalancer.server.port=9093"
+    stdin_open: true
+    tty: true
+
+  blackbox:
+    image: "blackbox:latest"
+    container_name: blackbox
+    hostname: blackbox
+    restart: unless-stopped
+    cpu_shares: 128
+    mem_limit: 128M 
+    networks:
+      - monitoring-vn
+    ports:
+      - "9115:9115"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.blackbox.rule=Host(`blackbox.local`)" 
+      - "traefik.http.routers.blackbox.service=blackbox"
+      - "traefik.http.routers.blackbox.tls=true"
+      - "traefik.http.routers.blackbox.priority=10"
+      - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
+    stdin_open: true
+    tty: true
+
+
+  cadvisor:
+    image: "cadvisor:latest"
+    container_name: cadvisor-grafana
+    hostname: cadvisor-grafana
+    restart: unless-stopped
+    cpu_shares: 128
+    mem_limit: 128M 
+    networks:
+      - monitoring-vn
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run:/var/run:ro"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/etc/machine-id:/etc/machine-id:ro"
+      - "/var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro"
+      - "/dev/disk/:/dev/disk"
+      - "/:/rootfs"
+    privileged: true
+    devices:
+      - "/dev/kmsg"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.local`)" 
+      - "traefik.http.routers.cadvisor.service=cadvisor"
+      - "traefik.http.routers.cadvisor.tls=true"
+      - "traefik.http.routers.cadvisor.priority=10"
+      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
+    stdin_open: true
+    tty: true
+
+  node-exporter:
+    image: "node-exporter:latest"
+    container_name: node-exporter
+    hostname: node-exporter
+    restart: unless-stopped
+    cpu_shares: 128
+    mem_limit: 128M 
+    networks:
+      - monitoring-vn
+    ports:
+      - "9100:9100"
+    volumes:
+      - '/:/host:ro,rslave'
+    pid: host
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.local`)"
+      - "traefik.http.routers.node-exporter.service=node-exporter"
+      - "traefik.http.routers.node-exporter.tls=true"
+      - "traefik.http.routers.node-exporter.priority=10"
+      - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
+    stdin_open: true
+    tty: true
+
+  prometheus:
+    image: "prometheus:latest"
+    container_name: prometheus
+    hostname: prometheus
+    restart: unless-stopped
+    cpu_shares: 512
+    mem_limit: 512M 
+    volumes:
+      - prometheus_volume:/etc/prometheus/
+    networks:
+      - monitoring-vn
+    ports:
+      - "9090:9090"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)"
+      - "traefik.http.routers.prometheus.service=prometheus"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.priority=10"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    stdin_open: true
+    tty: true
+
+  grafana:
+    image: "grafana:latest"
+    container_name: grafana
+    hostname: grafana
+    restart: unless-stopped
+    cpu_shares: 512
+    mem_limit: 512M 
+    networks:
+      - monitoring-vn
+    volumes:
+      - grafana_volume:/usr/share/grafana/data
+    ports:
+      - "3000:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.local`)"
+      - "traefik.http.routers.grafana.service=grafana"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.priority=10"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    stdin_open: true
+    tty: true

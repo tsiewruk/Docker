@@ -60,8 +60,8 @@ services:
 
   cadvisor:
     image: "cadvisor:latest"
-    container_name: cadvisor-grafana
-    hostname: cadvisor-grafana
+    container_name: cadvisor
+    hostname: cadvisor
     restart: unless-stopped
     cpu_shares: 128
     mem_limit: 128M 

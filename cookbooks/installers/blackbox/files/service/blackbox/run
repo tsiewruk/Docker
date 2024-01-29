@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+exec blackbox_exporter --config.file=/etc/blackbox/blackbox.yml

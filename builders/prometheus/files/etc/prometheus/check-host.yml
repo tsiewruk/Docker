@@ -101,6 +101,15 @@ groups:
           summary: "Container 'prometheus' is down!"
           description: "Container 'prometheus' has been down for more than 5 minutes."
 
+      - alert: Container "blackbox" is DOWN!
+        expr: absent(container_start_time_seconds{name="blackbox"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container 'blackbox' is down!"
+          description: "Container 'blackbox' has been down for more than 5 minutes."
+
       - alert: Container "traefik" is DOWN!
         expr: absent(container_start_time_seconds{name="traefik"})
         for: 5m

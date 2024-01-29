@@ -13,8 +13,8 @@
 ### How to enable the image container should be done
 `sudo docker compose up <service_name>`
 
-### How to Check Container Status.
-`sudo docker-compose ps`
+### How to check container status.
+`sudo docker compose ps`
 
 ### How to connect to a container.
 `sudo docker compose exec <service_name> bash`

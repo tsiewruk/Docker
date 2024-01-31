@@ -174,6 +174,52 @@ services:
     stdin_open: true
     tty: true
 
+  alert-manager:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/alert-manager
+        ALERTMANAGER_VERSION: 0.26.0
+      dockerfile: builders/alert-manager/Dockerfile
+    image: "alert-manager:latest"
+    container_name: alert-manager
+    hostname: alert-manager
+    ports:
+      - "9093:9093"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.alert-manager.rule=Host(`alert-manager.local`)"
+      - "traefik.http.routers.alert-manager.service=alert-manager"
+      - "traefik.http.routers.alert-manager.tls=true"
+      - "traefik.http.routers.alert-manager.priority=10"
+      - "traefik.http.services.alert-manager.loadbalancer.server.port=9093"
+    stdin_open: true
+    tty: true
+
+  blackbox:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/blackbox
+        BLACKBOX_VERSION: 0.24.0
+      dockerfile: builders/blackbox/Dockerfile
+    image: "blackbox:latest"
+    container_name: blackbox
+    hostname: blackbox
+    ports:
+      - "9115:9115"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.blackbox.rule=Host(`blackbox.local`)" 
+      - "traefik.http.routers.blackbox.service=blackbox"
+      - "traefik.http.routers.blackbox.tls=true"
+      - "traefik.http.routers.blackbox.priority=10"
+      - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
+    stdin_open: true
+    tty: true
+
   wazuh:
     build:
       context: .
@@ -210,29 +256,6 @@ services:
     image: "varnish:latest"
     environment:
       - VARNISH_CONFIG=default
-    stdin_open: true
-    tty: true
-
-  alert-manager:
-    build:
-      context: .
-      args:
-        cookbooks_dir: ./cookbooks
-        image_builder_dir: ./builders/alert-manager
-        ALERTMANAGER_VERSION: 0.26.0
-      dockerfile: builders/alert-manager/Dockerfile
-    image: "alert-manager:latest"
-    container_name: alert-manager
-    hostname: alert-manager
-    ports:
-      - "9093:9093"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.alert-manager.rule=Host(`alert-manager.local`)"
-      - "traefik.http.routers.alert-manager.service=alert-manager"
-      - "traefik.http.routers.alert-manager.tls=true"
-      - "traefik.http.routers.alert-manager.priority=10"
-      - "traefik.http.services.alert-manager.loadbalancer.server.port=9093"
     stdin_open: true
     tty: true
 

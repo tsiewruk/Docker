@@ -4,4 +4,4 @@ set -e
 
 cd /etc/prometheus/
 
-exec prometheus --config.file=/etc/prometheus/prometheus.yml
+exec prometheus --config.file=/etc/prometheus/prometheus.yml --web.external-url="https://prometheus.local" --web.route-prefix="/"

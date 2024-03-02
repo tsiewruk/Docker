@@ -17,7 +17,7 @@ RUN chmod 777 /tmp
 # configure root
 RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-root.sh"
 # install node-exporter
-RUN "${TMP_COOKBOOKS_DIR}/installers/node-exporter/node-exporter-install.sh" "${NODE_EXPORTER_VERSION}"
+RUN "${TMP_COOKBOOKS_DIR}/installers/prometheus/node-exporter/node-exporter-install.sh" "${NODE_EXPORTER_VERSION}"
 # clean up build
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
 # clean up tmp files

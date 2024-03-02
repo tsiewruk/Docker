@@ -267,15 +267,58 @@ services:
         image_builder_dir: ./builders/rabbitmq
       dockerfile: builders/rabbitmq/Dockerfile
     image: "rabbitmq:latest"
+    container_name: rabbitmq
+    hostname: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
       - "25672:25672"
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.dev`)"
-#      - "traefik.http.routers.rabbitmq.service=rabbitmq"
-#      - "traefik.http.routers.rabbitmq.tls=true"
-#      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.local`)"
+      - "traefik.http.routers.rabbitmq.service=rabbitmq"
+      - "traefik.http.routers.rabbitmq.tls=true"
+      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+    stdin_open: true
+    tty: true
+
+  wordpress:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/wordpress
+        WORDPRESS_VERSION: 6.4.3
+        PHP_VERSION: 8.2
+      dockerfile: builders/wordpress/Dockerfile
+    image: "wordpress:latest"
+    container_name: wordpress
+    hostname: wordpress
+    ports:
+      - "80:80"
+      - "443:443"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.rule=Host(`wordpress.local`)"
+      - "traefik.http.routers.wordpress.service=wordpress"
+      - "traefik.http.routers.wordpress.tls=true"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+    stdin_open: true
+    tty: true
+
+  mysql:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/mysql
+        MYSQL_VERSION: 8.29-1
+        MYSQL_ROOT_PASS: default
+      dockerfile: builders/mysql/Dockerfile
+    image: "mysql:latest"
+    container_name: mysql
+    hostname: mysql
+    ports:
+      - "3306:3306"
     stdin_open: true
     tty: true

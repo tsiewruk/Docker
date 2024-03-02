@@ -54,4 +54,6 @@ DNS.6         = prometheus.local
 DNS.7         = cadvisor.local
 DNS.8         = node-exporter.local
 DNS.9         = grafana.local
-DNS.3         = rabbitmq.local
+DNS.10        = rabbitmq.local
+DNS.11        = wordpress.local
+

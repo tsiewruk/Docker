@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+exec mysqld_safe --disable-log-bin --sql-mode="NO_ENGINE_SUBSTITUTION"

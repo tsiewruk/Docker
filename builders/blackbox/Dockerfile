@@ -22,7 +22,7 @@ RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-root.sh"
 # install git
 RUN "${TMP_COOKBOOKS_DIR}/installers/git/git-install.sh"
 # install blackbox
-RUN "${TMP_COOKBOOKS_DIR}/installers/blackbox/blackbox-install.sh" "${BLACKBOX_VERSION}"
+RUN "${TMP_COOKBOOKS_DIR}/installers/prometheus/blackbox/blackbox-install.sh" "${BLACKBOX_VERSION}"
 # clean up build & app
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
 # clean up files

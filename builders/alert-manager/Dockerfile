@@ -18,8 +18,8 @@ RUN chmod 777 /tmp
 RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-root.sh"
 # install git
 RUN "${TMP_COOKBOOKS_DIR}/installers/git/git-install.sh"
-# install grafana
-RUN "${TMP_COOKBOOKS_DIR}/installers/alert-manager/alertmanager-install.sh" "${ALERTMANAGER_VERSION}"
+# install alert-manager
+RUN "${TMP_COOKBOOKS_DIR}/installers/prometheus/alert-manager/alertmanager-install.sh" "${ALERTMANAGER_VERSION}"
 # clean up build
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
 # clean up tmp files

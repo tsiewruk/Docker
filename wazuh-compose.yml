@@ -1,0 +1,72 @@
+version: "3.7"
+
+networks:
+  default:
+    driver: bridge
+
+services:
+  wazuh-dashboard:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/wazuh-dashboard
+      dockerfile: builders/wazuh-dashboard/Dockerfile
+    image: "wazuh-dashboard:latest"
+    container_name: wazuh-dashboard
+    hostname: wazuh-dashboard
+    ports:
+      - "9200:9200"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-dashboard.rule=Host(`wazuh-dashboard.local`)"
+      - "traefik.http.routers.wazuh-dashboard.service=wazuh-dashboard"
+      - "traefik.http.routers.wazuh-dashboard.tls=true"
+      - "traefik.http.routers.wazuh-dashboard.priority=10"
+      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=9200"
+    stdin_open: true
+    tty: true
+
+  wazuh-indexer:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/wazuh-indexer
+      dockerfile: builders/wazuh-indexer/Dockerfile
+    image: "wazuh-indexer:latest"
+    container_name: wazuh-indexer
+    hostname: wazuh-indexer
+    ports:
+      - "9200:9200"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-indexer.rule=Host(`wazuh-indexer.local`)"
+      - "traefik.http.routers.wazuh-indexer.service=wazuh-indexer"
+      - "traefik.http.routers.wazuh-indexer.tls=true"
+      - "traefik.http.routers.wazuh-indexer.priority=10"
+      - "traefik.http.services.wazuh-indexer.loadbalancer.server.port=9200"
+    stdin_open: true
+    tty: true
+
+  wazuh-server:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/wazuh-server
+      dockerfile: builders/wazuh-server/Dockerfile
+    image: "wazuh-server:latest"
+    container_name: wazuh-server
+    hostname: wazuh-server
+    ports:
+      - "9200:9200"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-server.rule=Host(`wazuh-server.local`)"
+      - "traefik.http.routers.wazuh-server.service=wazuh-server"
+      - "traefik.http.routers.wazuh-server.tls=true"
+      - "traefik.http.routers.wazuh-server.priority=10"
+      - "traefik.http.services.wazuh-server.loadbalancer.server.port=9200"
+    stdin_open: true
+    tty: true

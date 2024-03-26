@@ -133,7 +133,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - prometheus_data:/etc/prometheus/
+      - prometheus_volume:/etc/prometheus/
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)" 

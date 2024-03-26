@@ -7,6 +7,10 @@ networks:
 volumes:
   jenkins_volume:
     external: true
+  grafana_volume:
+    external: true
+  prometheus_volume:
+    external: true
 
 services:
   ubuntu-base:
@@ -90,6 +94,31 @@ services:
     stdin_open: true
     tty: true
 
+  grafana:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/grafana
+        GRAFANA_VERSION: '10.1.4'
+      dockerfile: builders/grafana/Dockerfile
+    image: "grafana:latest"
+    container_name: grafana
+    hostname: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_volume:/var/lib/grafana
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.local`)"
+      - "traefik.http.routers.grafana.service=grafana"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.priority=10"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    stdin_open: true
+    tty: true
+
   prometheus:
     build:
       context: .
@@ -103,6 +132,8 @@ services:
     hostname: prometheus
     ports:
       - "9090:9090"
+    volumes:
+      - prometheus_volume:/etc/prometheus/
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)" 
@@ -171,6 +202,29 @@ services:
       - "traefik.http.routers.node-exporter.tls=true"
       - "traefik.http.routers.node-exporter.priority=10"
       - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
+    stdin_open: true
+    tty: true
+
+  mysql-exporter:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/mysql-exporter
+        MYSQL_EXPORTER_VERSION: 0.15.1
+      dockerfile: builders/mysql-exporter/Dockerfile
+    image: "mysql-exporter:latest"
+    container_name: mysql-exporter
+    hostname: mysql-exporter
+    ports:
+      - "9104:9104"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mysql-exporter.rule=Host(`mysql-exporter.local`)" 
+      - "traefik.http.routers.mysql-exporter.service=mysql-exporter"
+      - "traefik.http.routers.mysql-exporter.tls=true"
+      - "traefik.http.routers.mysql-exporter.priority=10"
+      - "traefik.http.services.mysql-exporter.loadbalancer.server.port=9104"
     stdin_open: true
     tty: true
 

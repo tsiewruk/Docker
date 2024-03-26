@@ -57,7 +57,6 @@ services:
     stdin_open: true
     tty: true
 
-
   cadvisor:
     image: "cadvisor:latest"
     container_name: cadvisor

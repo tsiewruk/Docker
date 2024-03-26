@@ -45,11 +45,11 @@ sleep 8
 ps auxf | awk '{print $2, $11}' | grep "/usr/share/grafana/bin/grafana" | awk '{print $1}' | xargs kill -9
 
 # prepare config file
-sed -i "s|<INSTANCE_NAME>|${}|" /usr/share/grafana/conf/defaults.ini-custom
-sed -i "s|<SMTP_EMAIL>|${}|" /usr/share/grafana/conf/defaults.ini-custom
-sed -i "s|<SMTP_PASSWORD>|${}|" /usr/share/grafana/conf/defaults.ini-custom
-sed -i "s|<SMTP_HOST>|${}|" /usr/share/grafana/conf/defaults.ini-custom
-
-mv /usr/share/grafana/conf/defaults.ini-custom /usr/share/grafana/conf/defaults.ini
+config_path=/usr/share/grafana/conf/
+sed -i "s|<INSTANCE_NAME>|${instance_name}|" ${config_path}/defaults.ini-custom
+sed -i "s|<SMTP_EMAIL>|${smtp_email}|" ${config_path}/defaults.ini-custom
+sed -i "s|<SMTP_PASSWORD>|${smtp_password}|" ${config_path}/defaults.ini-custom
+sed -i "s|<SMTP_HOST>|${smtp_host}|" ${config_path}/defaults.ini-custom
+mv /usr/share/grafana/conf/defaults.ini-custom ${config_path}/defaults.ini
 
 sed -i "s|b_configure_grafana_script=1|b_configure_grafana_script=0|" /etc/scripts.env

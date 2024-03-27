@@ -4,7 +4,7 @@ set -e
 
 if [ ! -f "/etc/entrypoint-scripts.env" ]; then
     touch /etc/entrypoint-scripts.env
-    echo "export a_download_repos=1" >> /etc/entrypoint-scripts.env
+    echo "export a_configure_grafana=1" >> /etc/entrypoint-scripts.env
 fi
 . /etc/entrypoint-scripts.env
 

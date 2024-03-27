@@ -30,7 +30,6 @@ http {
     gzip_vary on;
     gzip_disable "msie6";
 
-    # na potrzeby Xdebug
     fastcgi_buffers 16 16k;
     fastcgi_buffer_size 32k;
 

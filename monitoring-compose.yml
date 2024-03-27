@@ -114,6 +114,25 @@ services:
     stdin_open: true
     tty: true
 
+  mysql-exporter:
+    image: "mysql-exporter:latest"
+    container_name: mysql-exporter
+    hostname: mysql-exporter
+    restart: unless-stopped
+    cpu_shares: 128
+    mem_limit: 128M 
+    ports:
+      - "9104:9104"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mysql-exporter.rule=Host(`mysql-exporter.local`)"
+      - "traefik.http.routers.mysql-exporter.service=mysql-exporter"
+      - "traefik.http.routers.mysql-exporter.tls=true"
+      - "traefik.http.routers.mysql-exporter.priority=10"
+      - "traefik.http.services.mysql-exporter.loadbalancer.server.port=9104"
+    stdin_open: true
+    tty: true
+
   prometheus:
     image: "prometheus:latest"
     container_name: prometheus

@@ -274,29 +274,49 @@ services:
     stdin_open: true
     tty: true
 
-  wazuh:
+  wazuh-dashboard:
     build:
       context: .
       args:
         cookbooks_dir: ./cookbooks
-        image_builder_dir: ./builders/wazuh
-        WAZUH_VERSION: 4.7
-        INDEXER_NODE_1_IP: 127.0.0.1
-        WAZUH_MANAGER_NODE_1_IP: 127.0.0.1
-        DASHBOARD_NODE_1_IP: 127.0.0.1
-      dockerfile: builders/wazuh/Dockerfile
-    image: "wazuh:latest"
-    container_name: wazuh
-    hostname: wazuh
+        image_builder_dir: ./builders/wazuh-dashboard
+        WAZUH_DASHBOARD_VERSION: 4.7
+      dockerfile: builders/wazuh-dashboard/Dockerfile
+    image: "wazuh-dashboard:latest"
+    container_name: wazuh-dashboard
+    hostname: wazuh-dashboard
     ports:
       - "9200:9200"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wazuh.rule=Host(`wazuh.local`)"
-      - "traefik.http.routers.wazuh.service=wazuh"
-      - "traefik.http.routers.wazuh.tls=true"
-      - "traefik.http.routers.wazuh.priority=10"
-      - "traefik.http.services.wazuh.loadbalancer.server.port=9200"
+      - "traefik.http.routers.wazuh-dashboard.rule=Host(`wazuh-dashboard.local`)"
+      - "traefik.http.routers.wazuh-dashboard.service=wazuh-dashboard"
+      - "traefik.http.routers.wazuh-dashboard.tls=true"
+      - "traefik.http.routers.wazuh-dashboard.priority=10"
+      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=9200"
+    stdin_open: true
+    tty: true
+
+  wazuh-indexer:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/wazuh-indexer
+        WAZUH_DASHBOARD_VERSION: 4.7
+      dockerfile: builders/wazuh-indexer/Dockerfile
+    image: "wazuh-indexer:latest"
+    container_name: wazuh-indexer
+    hostname: wazuh-indexer
+    ports:
+      - "9200:9200"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-indexer.rule=Host(`wazuh-indexer.local`)"
+      - "traefik.http.routers.wazuh-indexer.service=wazuh-indexer"
+      - "traefik.http.routers.wazuh-indexer.tls=true"
+      - "traefik.http.routers.wazuh-indexer.priority=10"
+      - "traefik.http.services.wazuh-indexer.loadbalancer.server.port=9200"
     stdin_open: true
     tty: true
 

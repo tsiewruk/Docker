@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo-deployment
+  namespace: odoo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odoo
+  template:
+    metadata:
+      labels:
+        app: odoo
+    spec:
+      containers:
+      - name: odoo
+        image: docker.io/bitnami/odoo:16
+        ports:
+        - containerPort: 8069
+        env:
+        - name: ODOO_DATABASE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: odoo-configmap
+              key: DB_USER
+        - name: ODOO_DATABASE_USER
+          valueFrom:
+            configMapKeyRef:
+              name: odoo-configmap
+              key: DB_USER
+        - name: ODOO_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: odoo-secret
+              key: DB_PASSWORD
+        - name: ODOO_DATABASE_PORT_NUMBER
+          valueFrom:
+            configMapKeyRef:
+              name: odoo-configmap
+              key: DATABASE_PORT_NUMBER
+        - name: ODOO_DATABASE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: odoo-configmap
+              key: DATABASE_HOST

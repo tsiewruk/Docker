@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: odoo-configmap
+  namespace: odoo
+data:
+  DB_USER: odoo
+  DATABASE_NAME: odoo_db
+  DATABASE_PORT_NUMBER: 5432
+  DATABASE_HOST: "postgresql.odoo.svc.cluster.local"

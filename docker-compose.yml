@@ -326,6 +326,7 @@ services:
       args:
         cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/wazuh-server
+        WAZUH_SERVER_VERSION: 4.7
       dockerfile: builders/wazuh-server/Dockerfile
     image: "wazuh-server:latest"
     container_name: wazuh-server

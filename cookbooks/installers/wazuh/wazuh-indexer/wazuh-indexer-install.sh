@@ -7,6 +7,8 @@ set -e
 #source_dir=$(dirname $(readlink -f "$0"))
 #cp -R "${source_dir}/files/service" /
 
+WAZUH_INDEXER_VERSION="${1}"
+
 ####################################
 echo-info "Installing Wazuh Indexer - ${WAZUH_INDEXER_VERSION}"
 ####################################

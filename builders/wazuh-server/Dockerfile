@@ -3,7 +3,7 @@ FROM ubuntu-base:latest
 # ARG from docker-compose
 ARG cookbooks_dir
 ARG image_builder_dir
-ARG WAZUH_DASHBOARD_VERSION
+ARG WAZUH_SERVER_VERSION
 
 # ARG
 ARG TMP_COOKBOOKS_DIR='/tmp/cookbook'
@@ -17,7 +17,7 @@ RUN chmod 777 /tmp
 # configure root
 RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-root.sh"
 # install wazuh-dashboard
-RUN "${TMP_COOKBOOKS_DIR}/installers/wazuh/wazuh-dashboard/wazuh-dashboard-install.sh" "${WAZUH_DASHBOARD_VERSION}"
+RUN "${TMP_COOKBOOKS_DIR}/installers/wazuh/wazuh-dashboard/wazuh-server-install.sh" "${WAZUH_SERVER_VERSION}"
 # clean up build
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
 # clean up tmp files

@@ -286,14 +286,14 @@ services:
     container_name: wazuh-dashboard
     hostname: wazuh-dashboard
     ports:
-      - "9200:9200"
+      - "443:5601"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`wazuh-dashboard.local`)"
       - "traefik.http.routers.wazuh-dashboard.service=wazuh-dashboard"
       - "traefik.http.routers.wazuh-dashboard.tls=true"
       - "traefik.http.routers.wazuh-dashboard.priority=10"
-      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=9200"
+      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=443"
     stdin_open: true
     tty: true
 

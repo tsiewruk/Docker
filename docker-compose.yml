@@ -320,6 +320,28 @@ services:
     stdin_open: true
     tty: true
 
+  wazuh-server:
+    build:
+      context: .
+      args:
+        cookbooks_dir: ./cookbooks
+        image_builder_dir: ./builders/wazuh-server
+      dockerfile: builders/wazuh-server/Dockerfile
+    image: "wazuh-server:latest"
+    container_name: wazuh-server
+    hostname: wazuh-server
+    ports:
+      - "9200:9200"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-server.rule=Host(`wazuh-server.local`)"
+      - "traefik.http.routers.wazuh-server.service=wazuh-server"
+      - "traefik.http.routers.wazuh-server.tls=true"
+      - "traefik.http.routers.wazuh-server.priority=10"
+      - "traefik.http.services.wazuh-server.loadbalancer.server.port=9200"
+    stdin_open: true
+    tty: true
+
   varnish:
     build:
       context: .

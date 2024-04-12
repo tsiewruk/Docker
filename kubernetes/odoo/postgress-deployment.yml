@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -40,3 +41,16 @@ spec:
       volumes:
       - name: postgres-storage
         emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-service
+  namespace: odoo
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  type: ClusterIP
+  selector:
+    app: postgresql-service

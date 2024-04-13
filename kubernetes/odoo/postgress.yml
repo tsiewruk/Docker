@@ -14,9 +14,15 @@ spec:
       labels:
         app: postgresql
     spec:
+      # securityContext:
+      #   runAsUser: 10000
+      #   runAsNonRoot: true
+      #   runAsGroup: 10001
+      #   fsGroup: 10001 
       containers:
       - name: postgres
         image: docker.io/bitnami/postgresql:15
+        imagePullPolicy: Always
         ports:
         - containerPort: 5432
         env:
@@ -53,4 +59,4 @@ spec:
     targetPort: 5432
   type: ClusterIP
   selector:
-    app: postgresql-service
+    app: postgresql

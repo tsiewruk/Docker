@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: blue-green-ingress
+  labels:
+    part-of: blue-green-template
+  annotations:
+    # deprecated
+    # kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /()(.*)
+        pathType: Prefix
+        backend:
+          service: 
+            name: app1-name-template
+            port:
+              number: 80
+      - path: /api(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: app2-name-template
+            port: 
+              number: 80

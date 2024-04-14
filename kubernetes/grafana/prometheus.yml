@@ -2,17 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grafana-deployment
+  name: prometheus-deployment
   namespace: grafana
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: grafana
+      app: prometheus
   template:
     metadata:
       labels:
-        app: grafana
+        app: prometheus
     spec:
       # securityContext:
       #   runAsUser: 10000
@@ -20,12 +20,12 @@ spec:
       #   runAsGroup: 10001
       #   fsGroup: 10001 
       containers:
-      - name: grafana
-        image: grafana:latest
+      - name: prometheus
+        image: prometheus:latest
         imagePullPolicy: Always
         ports:
         - name: http
-          containerPort: 3000
+          containerPort: 9090
           protocol: TCP
         resources:
           requests:
@@ -47,25 +47,18 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           tcpSocket:
-            port: 3000
+            port: 9090
           timeoutSeconds: 1
-      #   volumeMounts:
-      #     - mountPath: /var/lib/grafana
-      #       name: grafana-pv
-      # volumes:
-      #   - name: grafana-pv
-      #     persistentVolumeClaim:
-      #       claimName: grafana-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: grafana-service
+  name: prometheus-service
   namespace: grafana
 spec:
   ports:
-  - port: 3000
-    targetPort: 3000
+  - port: 9090
+    targetPort: 9090
   selector:
-    app: grafana
+    app: prometheus
   type: ClusterIP

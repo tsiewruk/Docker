@@ -6,20 +6,21 @@ set -e
 
 source_dir=$(dirname $(readlink -f "$0"))
 
-USER_NAME="${1}"
+TECH_USER_NAME="${1}"
+TECH_USER_GROUPS="${2}"
 
 ####################################
 echo-info "Configure ${USER_NAME} user"
 ####################################
 
-groupadd -g 10001 "${USER_NAME}"
-useradd -u 10000 -g "${USER_NAME}" --create-home "${USER_NAME}" --shell "/bin/bash"
+groupadd -g 10001 "${TECH_USER_NAME}"
+useradd -u 10000 -g "${TECH_USER_GROUPS}" --create-home "${TECH_USER_NAME}" --shell "/bin/bash"
 
-#cp -R "${source_dir}/files/home/techuser/." "/home/${USER_NAME}/"
-#cp "/home/${USER_NAME}/".ssh/id_rsa.pub "/home/${USER_NAME}/".ssh/authorized_keys
+#cp -R "${source_dir}/files/home/techuser/." "/home/${TECH_USER_NAME}/"
+#cp "/home/${TECH_USER_NAME}/".ssh/id_rsa.pub "/home/${TECH_USER_NAME}/".ssh/authorized_keys
 
-#chmod 755 "/home/${USER_NAME}/.ssh"
-#chmod 600 "/home/${USER_NAME}/.ssh/id_rsa" "/home/${USER_NAME}/.environment"
-#chmod 644 "/home/${USER_NAME}/.ssh/id_rsa.pub" "/home/${USER_NAME}/.ssh/config" "/home/${USER_NAME}/.ssh/authorized_keys"
+#chmod 755 "/home/${TECH_USER_NAME}/.ssh"
+#chmod 600 "/home/${TECH_USER_NAME}/.ssh/id_rsa" "/home/${TECH_USER_NAME}/.environment"
+#chmod 644 "/home/${TECH_USER_NAME}/.ssh/id_rsa.pub" "/home/${TECH_USER_NAME}/.ssh/config" "/home/${TECH_USER_NAME}/.ssh/authorized_keys"
 
-chown -R "${USER_NAME}":"${USER_NAME}" "/home/${USER_NAME}/"
+chown -R "${TECH_USER_NAME}":"${TECH_USER_NAME}" "/home/${TECH_USER_NAME}/"

@@ -8,6 +8,8 @@ ARG MYSQL_VERSION
 # ARG
 ARG DEBIAN_FRONTEND='noninteractive'
 ARG TMP_COOKBOOKS_DIR='/tmp/cookbook'
+ARG TECH_USER_NAME='techuser'
+ARG TECH_USER_GROUPS="${TECH_USER_NAME}"
 
 # required files
 COPY "${cookbooks_dir}" "${TMP_COOKBOOKS_DIR}"
@@ -15,13 +17,15 @@ COPY "${image_builder_dir}/files" /
 
 # install requirements
 RUN chmod 777 /tmp
-# configure root
-RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-root.sh"
+# configure tech user
+RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
 # install mysql
 RUN "${TMP_COOKBOOKS_DIR}/installers/mysql/mysql-install.sh" ${MYSQL_VERSION} ${MYSQL_ROOT_PASS} 
 # clean up build & tmp files
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
     && rm -rf "${TMP_COOKBOOKS_DIR}"
+
+USER "${TECH_USER_NAME}":"${TECH_USER_NAME}"
 
 EXPOSE 3306 33060
 ENTRYPOINT ["entrypoint.sh"]

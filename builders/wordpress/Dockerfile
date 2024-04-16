@@ -9,6 +9,8 @@ ARG WORDPRESS_VERSION
 # ARG
 ARG DEBIAN_FRONTEND='noninteractive'
 ARG TMP_COOKBOOKS_DIR='/tmp/cookbook'
+ARG TECH_USER_NAME='techuser'
+ARG TECH_USER_GROUPS="${TECH_USER_NAME}"
 
 # ENV
 ENV APP_PATH='/var/www/data'
@@ -19,8 +21,8 @@ COPY "${image_builder_dir}/files" /
 
 # install requirements
 RUN chmod 777 /tmp
-# configure root
-RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-root.sh"
+# configure tech user
+RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
 # install & configure nginx
 RUN "${TMP_COOKBOOKS_DIR}/installers/nginx/nginx-install.sh" \
     && install -d -o www-data -g www-data -m 750 "${APP_PATH}" \
@@ -51,5 +53,7 @@ RUN "${TMP_COOKBOOKS_DIR}/installers/wordpress/wordpress-install.sh" ${WORDPRESS
 # clean up build & tmp files
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
     && rm -rf "${TMP_COOKBOOKS_DIR}"
+
+USER "${TECH_USER_NAME}":"${TECH_USER_NAME}"
 
 ENTRYPOINT ["entrypoint.sh"]

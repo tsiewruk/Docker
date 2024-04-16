@@ -24,5 +24,5 @@ RUN "${TMP_COOKBOOKS_DIR}/installers/traefik/traefik-install.sh" "${TRAEFIK_VERS
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
     && rm -rf "${TMP_COOKBOOKS_DIR}"
 
-EXPOSE 80
+EXPOSE 80 443
 ENTRYPOINT ["entrypoint.sh"]

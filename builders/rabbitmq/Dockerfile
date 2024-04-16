@@ -6,12 +6,12 @@ ARG image_builder_dir
 ARG ERLANG_VERSION
 ARG RABBITMQ_VERSION
 
-# ARG build
+# ARG
 ARG DEBIAN_FRONTEND='noineractive'
 ARG TMP_FILES_DIR='/tmp/cookbook/'
 ARG SSL_VERSION='1.1.1.1'
 
-# ENV build + image
+# ENV
 ENV UBUNTU_RELEASE='focal'
 
 # required files

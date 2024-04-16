@@ -6,6 +6,7 @@ ARG image_builder_dir
 ARG ANSIBLE_VERSION
 ARG PYTHON_VERSION
 ARG TERRAFORM_VERSION
+ARG HELM_VERSION
 
 # ARG 
 ARG DEBIAN_FRONTEND='noineractive'
@@ -33,6 +34,8 @@ RUN "${TMP_COOKBOOKS_DIR}/installers/ansible/ansible-install.sh" "${ANSIBLE_VERS
 RUN "${TMP_COOKBOOKS_DIR}/installers/terraform/terraform-install.sh" "${TERRAFORM_VERSION}"
 # install azure-cli
 RUN "${TMP_COOKBOOKS_DIR}/installers/azure-cli/azure-cli-install.sh"
+# install helm
+RUN "${TMP_COOKBOOKS_DIR}/installers/helm/helm-install.sh" "${HELM_VERSION}"
 # clean up build
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
 # clean up tmp files

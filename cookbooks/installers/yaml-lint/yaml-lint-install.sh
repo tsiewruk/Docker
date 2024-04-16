@@ -8,5 +8,5 @@ set -e
 echo-info "Installing YAML Lint"
 ####################################
 
-apt-get update -y
-apt-get install -y yamllint
+apt-get -y update
+apt-get -y install --no-install-recommends yamllint

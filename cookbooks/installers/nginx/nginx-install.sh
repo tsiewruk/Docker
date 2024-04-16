@@ -11,5 +11,5 @@ cp -R "${source_dir}/files/service" /
 echo-info "Installing NGINX"
 ####################################
 
-apt-get update
-apt-get install -y nginx
+apt-get -y update
+apt-get -y install --no-install-recommends nginx

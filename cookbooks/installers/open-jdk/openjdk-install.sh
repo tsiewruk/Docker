@@ -10,5 +10,5 @@ OPEN_JDK_VERSION="${1}"
 echo-info "Installing Open-JDK version - ${OPEN_JDK_VERSION}"
 ####################################
 
-apt-get update -y
-apt-get install -y fontconfig openjdk-${OPEN_JDK_VERSION}-jre
+apt-get -y update
+apt-get -y install --no-install-recommends fontconfig openjdk-${OPEN_JDK_VERSION}-jre

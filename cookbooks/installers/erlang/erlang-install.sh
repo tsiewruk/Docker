@@ -21,10 +21,10 @@ deb-src [signed-by=/usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg] ht
 EOF
 
 ## Update package indices
-apt-get update -y
+apt-get -y update
 
 ## Install Erlang packages
-apt-get install -y --no-install-recommends erlang-base \
+apt-get -y install --no-install-recommends erlang-base \
                         erlang-asn1 erlang-crypto erlang-eldap erlang-ftp erlang-inets \
                         erlang-mnesia erlang-os-mon erlang-parsetools erlang-public-key \
                         erlang-runtime-tools erlang-snmp erlang-ssl \

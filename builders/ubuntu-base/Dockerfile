@@ -17,12 +17,12 @@ COPY "${image_builder_dir}/files" /
 RUN chmod 777 /tmp && apt-get update -y && apt-get upgrade -y
 # install requirements
 RUN apt-get -y install --no-install-recommends \
-       less vim tzdata \
-       ca-certificates gnupg \
-       s6 sudo htop locales logrotate \
-       bash-completion dialog procps \
-       rsync telnet net-tools iputils-ping curl wget zip \
-       apt-utils apt-transport-https lsb-release software-properties-common
+    less vim tzdata \
+    ca-certificates gnupg \
+    s6 sudo htop locales logrotate \
+    bash-completion dialog procps \
+    rsync telnet net-tools iputils-ping curl wget zip \
+    apt-utils apt-transport-https lsb-release software-properties-common
 # set timezone
 RUN "${TMP_COOKBOOKS_DIR}/setters/timezone/timezone-set.sh" "${TZ}"
 # set locals

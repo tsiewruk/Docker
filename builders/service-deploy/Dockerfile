@@ -32,6 +32,8 @@ RUN "${TMP_COOKBOOKS_DIR}/installers/json-lint/json-lint-install.sh"
 RUN "${TMP_COOKBOOKS_DIR}/installers/ansible/ansible-install.sh" "${ANSIBLE_VERSION}"
 # install terraform
 RUN "${TMP_COOKBOOKS_DIR}/installers/terraform/terraform-install.sh" "${TERRAFORM_VERSION}"
+# install open-tofu
+RUN "${TMP_COOKBOOKS_DIR}/installers/open-tofu/open-tofu-install.sh" "${OPEN_TOFU_VERSION}"
 # install azure-cli
 RUN "${TMP_COOKBOOKS_DIR}/installers/azure-cli/azure-cli-install.sh"
 # install helm

@@ -21,8 +21,8 @@ COPY "${image_builder_dir}/files" /
 # additional requirements
 RUN chmod 777 /tmp
 # install requirements
-RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends dpkg-dev
+RUN apt-get -y update \
+    && apt-get -y install --no-install-recommends dpkg-dev
 # install ssl
 RUN "${TMP_COOKBOOKS_DIR}/installers/ssl/ssl-install.sh" "${SSL_VERSION}"
 # install erlang

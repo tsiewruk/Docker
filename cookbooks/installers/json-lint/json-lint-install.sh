@@ -8,5 +8,5 @@ set -e
 echo-info "Installing JSON Lint"
 ####################################
 
-apt-get update -y
-apt-get install -y jsonlint
+apt-get -y update
+apt-get -y install --no-install-recommends jsonlint

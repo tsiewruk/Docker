@@ -12,7 +12,7 @@ USER_NAME="${1}"
 echo-info "Configure ${USER_NAME} user"
 ####################################
 
-groupadd -u 10001 "${USER_NAME}"
+groupadd -g 10001 "${USER_NAME}"
 useradd -u 10000 -g "${USER_NAME}" --create-home "${USER_NAME}" --shell "/bin/bash"
 
 #cp -R "${source_dir}/files/home/techuser/." "/home/${USER_NAME}/"

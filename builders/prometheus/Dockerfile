@@ -20,9 +20,8 @@ RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-root.sh"
 RUN "${TMP_COOKBOOKS_DIR}/installers/git/git-install.sh"
 # install prometheus
 RUN "${TMP_COOKBOOKS_DIR}/installers/prometheus/prometheus/prometheus-install.sh" "${PROMETHEUS_VERSION}"
-# clean up build
-RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
-# clean up tmp files
-RUN rm -rf "${TMP_COOKBOOKS_DIR}"
+# clean up build & tmp files
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
+    && rm -rf "${TMP_COOKBOOKS_DIR}"
 
 ENTRYPOINT ["entrypoint.sh"]

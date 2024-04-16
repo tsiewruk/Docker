@@ -20,10 +20,9 @@ RUN chmod 777 /tmp
 RUN "${TMP_COOKBOOKS_DIR}/installers/openssh/server/openssh-install.sh"
 # install traefik
 RUN "${TMP_COOKBOOKS_DIR}/installers/traefik/traefik-install.sh" "${TRAEFIK_VERSION}"
-# clean up build
-RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
-# clean up tmp files
-RUN rm -rf "${TMP_COOKBOOKS_DIR}"
+# clean up build & tmp files
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
+    && rm -rf "${TMP_COOKBOOKS_DIR}"
 
 EXPOSE 80
 ENTRYPOINT ["entrypoint.sh"]

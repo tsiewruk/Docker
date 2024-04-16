@@ -1,18 +1,18 @@
 groups:
-  - name: ssl-expiry-rule
-    rules:
-      - alert: SSLCertExpiring - warning
-        expr: (probe_ssl_earliest_cert_expiry{job="blackbox-scrap"} - time()) / 3600 / 24 < 30
-        for: 60m
-        labels:
-          severity: "warning"
-        annotations:
-          description: SSL Certificate for {{ $labels.instance }} expires in {{ .Value | humanizeDuration }} days.
-  
-      - alert: SSLCertExpiring - alert
-        expr: (probe_ssl_earliest_cert_expiry{job="blackbox-scrap"} - time()) / 3600 / 24 < 7
-        for: 60m
-        labels:
-          severity: "critical"
-        annotations:
-          description: SSL Certificate for {{ $labels.instance }} expires in {{ .Value | humanizeDuration }} days.
+- name: ssl-expiry-rule
+  rules:
+  - alert: SSLCertExpiring - warning
+    expr: (probe_ssl_earliest_cert_expiry{job="blackbox-scrap"} - time()) / 3600 / 24 < 30
+    for: 60m
+    labels:
+      severity: "warning"
+    annotations:
+      description: SSL Certificate for {{ $labels.instance }} expires in {{ .Value | humanizeDuration }} days.
+
+  - alert: SSLCertExpiring - alert
+    expr: (probe_ssl_earliest_cert_expiry{job="blackbox-scrap"} - time()) / 3600 / 24 < 7
+    for: 60m
+    labels:
+      severity: "critical"
+    annotations:
+      description: SSL Certificate for {{ $labels.instance }} expires in {{ .Value | humanizeDuration }} days.

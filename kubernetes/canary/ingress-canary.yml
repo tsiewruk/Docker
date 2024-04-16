@@ -1,4 +1,3 @@
----
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -23,5 +22,5 @@ spec:
         backend:
           service:
             name: app-name-template
-            port: 
+            port:
               number: 80

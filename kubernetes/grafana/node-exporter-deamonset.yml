@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -28,11 +27,11 @@ spec:
           mountPath: /root-disk
           readOnly: true
       volumes:
-        - name: data-disk
-          hostPath:
-            path: /localdata
-        - name: root-disk
-          hostPath:
-            path: /
+      - name: data-disk
+        hostPath:
+          path: /localdata
+      - name: root-disk
+        hostPath:
+          path: /
       hostNetwork: true
       hostPID: true

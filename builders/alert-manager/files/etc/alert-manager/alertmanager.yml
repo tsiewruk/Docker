@@ -6,13 +6,13 @@ route:
   group_interval: 15s
 
 receivers:
-  - name: 'Mail Alert'
-    email_configs:
-      - smarthost: 'X'
-        auth_username: 'X'
-        auth_password: "X"
-        from: 'X'
-        to: 'X'
-        headers:
-          subject: 'Alert Main'
-        send_resolved: true
+- name: 'Mail Alert'
+  email_configs:
+  - smarthost: 'X'
+    auth_username: 'X'
+    auth_password: "X"
+    from: 'X'
+    to: 'X'
+    headers:
+      subject: 'Alert Main'
+    send_resolved: true

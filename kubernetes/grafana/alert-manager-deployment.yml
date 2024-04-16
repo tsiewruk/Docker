@@ -17,7 +17,7 @@ spec:
         runAsUser: 10000
         runAsNonRoot: true
         runAsGroup: 10001
-        fsGroup: 10001 
+        fsGroup: 10001
       containers:
       - name: alert-manager
         image: alert-manager:latest

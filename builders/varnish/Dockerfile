@@ -16,9 +16,8 @@ COPY "${image_build_dir}/files" /
 RUN chmod 777 /tmp
 # install varnish
 RUN "${TMP_COOKBOOKS_DIR}/installers/varnish/varnish-install.sh"
-# clean up build
-RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
-# clean up tmp files
-RUN rm -rf "${TMP_COOKBOOKS_DIR}"
+# clean up build & tmp files
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
+    && rm -rf "${TMP_COOKBOOKS_DIR}"
 
 ENTRYPOINT ["entrypoint.sh"]

@@ -61,7 +61,7 @@ services:
         ANSIBLE_VERSION: 2.9
         PYTHON_VERSION: 3.9
         TERRAFORM_VERSION: 1.3.7
-        OPEN_TOFU_VERISON: 1.6.2
+        OPEN_TOFU_VERSION: 1.6.2
         HELM_VERSION: 3.13.4
       dockerfile: builders/service-deploy/Dockerfile
     image: "service-deploy:latest"

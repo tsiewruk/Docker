@@ -21,10 +21,9 @@ RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "${TECH_USER_NAME}
 RUN "${TMP_COOKBOOKS_DIR}/installers/git/git-install.sh"
 # install alert-manager
 RUN "${TMP_COOKBOOKS_DIR}/installers/prometheus/alert-manager/alertmanager-install.sh" "${ALERTMANAGER_VERSION}"
-# clean up build
-RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
-# clean up tmp files
-RUN rm -rf "${TMP_COOKBOOKS_DIR}"
+# clean up build & tmp files
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
+    && rm -rf "${TMP_COOKBOOKS_DIR}"
 
 USER "${TECH_USER_NAME}":"${TECH_USER_NAME}"
 

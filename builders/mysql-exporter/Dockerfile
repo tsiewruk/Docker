@@ -21,9 +21,8 @@ RUN chmod 777 /tmp
 RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-root.sh"
 # install cadvisor
 RUN "${TMP_COOKBOOKS_DIR}/installers/prometheus/mysql-exporter/mysql-exporter-install.sh" "${MYSQL_EXPORTER_VERSION}"
-# clean up build
-RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
-# clean up tmp files
-RUN rm -rf "${TMP_COOKBOOKS_DIR}"
+# clean up build & tmp files
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
+    && rm -rf "${TMP_COOKBOOKS_DIR}"
 
 ENTRYPOINT ["entrypoint.sh"]

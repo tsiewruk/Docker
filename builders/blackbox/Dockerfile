@@ -4,6 +4,7 @@ FROM ubuntu-base:latest
 ARG cookbooks_dir
 ARG image_builder_dir
 ARG BLACKBOX_VERSION
+ARG TECH_USER_NAME='techuser'
 
 # ARG 
 ARG TMP_COOKBOOKS_DIR='/tmp/cookbook'
@@ -23,9 +24,8 @@ RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-root.sh"
 RUN "${TMP_COOKBOOKS_DIR}/installers/git/git-install.sh"
 # install blackbox
 RUN "${TMP_COOKBOOKS_DIR}/installers/prometheus/blackbox/blackbox-install.sh" "${BLACKBOX_VERSION}"
-# clean up build & app
-RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
-# clean up files
-RUN rm -rf "${TMP_COOKBOOKS_DIR}"
+# clean up build & tmp files
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
+    && rm -rf "${TMP_COOKBOOKS_DIR}"
 
 ENTRYPOINT ["entrypoint.sh"]

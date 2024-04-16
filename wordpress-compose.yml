@@ -34,19 +34,19 @@ services:
     container_name: traefik
     hostname: traefik
     environment:
-      - TRAEFIK_CONFIG=local
-      - CERT_CONFIG=local 
+    - TRAEFIK_CONFIG=local
+    - CERT_CONFIG=local
     ports:
-      - "80:80"
-      - "443:443"
+    - "80:80"
+    - "443:443"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.local`)" 
-      - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.tls=true"
-      - "traefik.http.routers.traefik.priority=1"
+    - "traefik.enable=true"
+    - "traefik.http.routers.traefik.rule=Host(`traefik.local`)"
+    - "traefik.http.routers.traefik.service=api@internal"
+    - "traefik.http.routers.traefik.tls=true"
+    - "traefik.http.routers.traefik.priority=1"
     stdin_open: true
     tty: true
 
@@ -56,28 +56,28 @@ services:
     hostname: wordpress
     restart: unless-stopped
     cpu_shares: 128
-    mem_limit: 256M 
+    mem_limit: 256M
     networks:
-      - default-vn
+    - default-vn
     ports:
-      - "80:80"
-      - "443:443"
+    - "80:80"
+    - "443:443"
     environment:
       WORDPRESS_DB_HOST: mysql:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
-#    volumes:
-#      - wordpress_volume:/var/www/data/wordpress
+      #    volumes:
+      #      - wordpress_volume:/var/www/data/wordpress
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.wordpress.rule=Host(`wordpress.local`)" 
-      - "traefik.http.routers.wordpress.service=wordpress"
-      - "traefik.http.routers.wordpress.tls=true"
-      - "traefik.http.routers.wordpress.priority=10"
-      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
-#    depends_on:
-#      - mysql
-#      - traefik
+    - "traefik.enable=true"
+    - "traefik.http.routers.wordpress.rule=Host(`wordpress.local`)"
+    - "traefik.http.routers.wordpress.service=wordpress"
+    - "traefik.http.routers.wordpress.tls=true"
+    - "traefik.http.routers.wordpress.priority=10"
+    - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+    #    depends_on:
+    #      - mysql
+    #      - traefik
     stdin_open: true
     tty: true
 
@@ -87,19 +87,19 @@ services:
     hostname: mysql
     restart: unless-stopped
     cpu_shares: 128
-    mem_limit: 256M 
+    mem_limit: 256M
     networks:
-      - default-vn
+    - default-vn
     ports:
-      - "3306:3306"
+    - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: wordpress
-#    volumes:
-#      - mysql_volume:/var/lib/mysql
+      #    volumes:
+      #      - mysql_volume:/var/lib/mysql
     depends_on:
-      - traefik
+    - traefik
     stdin_open: true
     tty: true

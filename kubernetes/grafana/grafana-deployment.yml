@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,7 +17,7 @@ spec:
         runAsUser: 10000
         runAsNonRoot: true
         runAsGroup: 10001
-        fsGroup: 10001 
+        fsGroup: 10001
       containers:
       - name: grafana
         image: grafana:latest

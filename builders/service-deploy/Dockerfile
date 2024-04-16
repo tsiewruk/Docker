@@ -7,6 +7,7 @@ ARG ANSIBLE_VERSION
 ARG PYTHON_VERSION
 ARG TERRAFORM_VERSION
 ARG HELM_VERSION
+ARG OPEN_TOFU_VERSION
 
 # ARG 
 ARG DEBIAN_FRONTEND='noineractive'
@@ -38,9 +39,8 @@ RUN "${TMP_COOKBOOKS_DIR}/installers/open-tofu/open-tofu-install.sh" "${OPEN_TOF
 RUN "${TMP_COOKBOOKS_DIR}/installers/azure-cli/azure-cli-install.sh"
 # install helm
 RUN "${TMP_COOKBOOKS_DIR}/installers/helm/helm-install.sh" "${HELM_VERSION}"
-# clean up build
-RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
-# clean up tmp files
-RUN rm -rf "${TMP_COOKBOOKS_DIR}"
+# clean up build & tmp files
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
+    && rm -rf "${TMP_COOKBOOKS_DIR}"
 
 ENTRYPOINT ["entrypoint.sh"]

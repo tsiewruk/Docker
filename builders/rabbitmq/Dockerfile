@@ -29,9 +29,8 @@ RUN "${TMP_COOKBOOKS_DIR}/installers/ssl/ssl-install.sh" "${SSL_VERSION}"
 RUN "${TMP_COOKBOOKS_DIR}/installers/erlang/erlang-install.sh" "${UBUNTU_RELEASE}"
 # install rabbitmq
 RUN "${TMP_COOKBOOKS_DIR}/installers/rabbitmq/rabbitmq-install.sh" "${UBUNTU_RELEASE}"
-# clean up build
-RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh"
-# clean up tmp files
-RUN rm -rf "${TMP_COOKBOOKS_DIR}"
+# clean up build & tmp files
+RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
+    && rm -rf "${TMP_COOKBOOKS_DIR}"
 
 ENTRYPOINT ["entrypoint.sh"]

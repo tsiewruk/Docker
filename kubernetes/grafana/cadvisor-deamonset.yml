@@ -73,16 +73,3 @@ spec:
       - name: disk
         hostPath:
           path: /dev/disk
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: cadvisor-service
-  namespace: grafana
-spec:
-  ports:
-  - port: 8080
-    targetPort: 8080
-  selector:
-    app: cadvisor
-  type: ClusterIP

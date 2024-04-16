@@ -1,38 +1,39 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: alert-manager-deployment
+  name: grafana-deployment
   namespace: grafana
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: alert-manager
+      app: grafana
   template:
     metadata:
       labels:
-        app: alert-manager
+        app: grafana
     spec:
-      # securityContext:
-      #   runAsUser: 10000
-      #   runAsNonRoot: true
-      #   runAsGroup: 10001
-      #   fsGroup: 10001 
+      securityContext:
+        runAsUser: 10000
+        runAsNonRoot: true
+        runAsGroup: 10001
+        fsGroup: 10001 
       containers:
-      - name: alert-manager
-        image: alert-manager:latest
+      - name: grafana
+        image: grafana:latest
         imagePullPolicy: Always
         ports:
         - name: http
-          containerPort: 9093
+          containerPort: 3000
           protocol: TCP
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "50m"
+            memory: "500Mi"
+            cpu: "200m"
           limits:
-            memory: "250Mi"
-            cpu: "100m"
+            memory: "750Mi"
+            cpu: "250m"
         # readinessProbe:
         #   httpGet:
         #     scheme: HTTP
@@ -46,18 +47,12 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           tcpSocket:
-            port: 9093
+            port: 3000
           timeoutSeconds: 1
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: alert-manager-service
-  namespace: grafana
-spec:
-  ports:
-  - port: 9093
-    targetPort: 9093
-  selector:
-    app: alert-manager
-  type: ClusterIP
+      #   volumeMounts:
+      #     - mountPath: /var/lib/grafana
+      #       name: grafana-pv
+      # volumes:
+      #   - name: grafana-pv
+      #     persistentVolumeClaim:
+      #       claimName: grafana-pvc

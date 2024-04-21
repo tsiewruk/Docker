@@ -17,4 +17,6 @@ wget https://github.com/prometheus/mysqld_exporter/releases/download/v${MYSQL_EX
 tar -xvzf /tmp/mysql-exporter/mysqld_exporter-${MYSQL_EXPORTER_VERSION}.linux-amd64.tar.gz -C /tmp/mysql-exporter
 mv /tmp/mysql-exporter/mysqld_exporter-${MYSQL_EXPORTER_VERSION}.linux-amd64/mysqld_exporter /usr/local/bin/
 
+chown -R ${TECH_USER_NAME}:${TECH_USER_NAME} /usr/local/bin /service
+
 rm -rf /tmp/mysql-exporter

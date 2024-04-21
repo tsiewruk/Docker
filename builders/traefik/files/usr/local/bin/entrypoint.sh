@@ -4,7 +4,7 @@ set -e
 
 if [ ! -f "/etc/entrypoint-scripts.env" ]; then
     touch /etc/entrypoint-scripts.env
-    echo "export a_configure_mysql=1" >> /etc/entrypoint-scripts.env
+    echo "export a_set_traefik_config=1" >> /etc/entrypoint-scripts.env
 fi
 . /etc/entrypoint-scripts.env
 

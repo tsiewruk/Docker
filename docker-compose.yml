@@ -87,12 +87,14 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_volume:/root/.jenkins
+      - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jenkins.rule=Host(`jenkins.local`)"
       - "traefik.http.routers.jenkins.service=jenkins"
       - "traefik.http.routers.jenkins.tls=true"
       - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+    privileged: true
     stdin_open: true
     tty: true
 

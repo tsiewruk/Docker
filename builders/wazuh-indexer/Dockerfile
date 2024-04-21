@@ -24,6 +24,6 @@ RUN "${TMP_COOKBOOKS_DIR}/installers/wazuh/wazuh-indexer/wazuh-indexer-install.s
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
     && rm -rf "${TMP_COOKBOOKS_DIR}"
 
-USER "${TECH_USER_NAME}":"${TECH_USER_NAME}"
+#USER "${TECH_USER_NAME}":"${TECH_USER_NAME}"
 
 ENTRYPOINT ["entrypoint.sh"]

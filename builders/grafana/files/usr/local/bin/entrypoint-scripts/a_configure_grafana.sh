@@ -52,4 +52,4 @@ sed -i "s|<SMTP_PASSWORD>|${smtp_password}|" ${config_path}/defaults.ini-custom
 sed -i "s|<SMTP_HOST>|${smtp_host}|" ${config_path}/defaults.ini-custom
 mv /usr/share/grafana/conf/defaults.ini-custom ${config_path}/defaults.ini
 
-sed -i "s|b_configure_grafana_script=1|b_configure_grafana_script=0|" /etc/entrypoint-scripts.env
+sed -i "s|b_configure_grafana_script=1|b_configure_grafana_script=0|" /usr/local/bin/entrypoint-scripts.env

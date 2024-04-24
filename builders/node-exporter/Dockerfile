@@ -16,10 +16,12 @@ COPY "${image_builder_dir}/files" /
 
 # install requirements
 RUN chmod 777 /tmp
-# configure tech user
-RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
+# create tech-user
+RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/add-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
 # install node-exporter
 RUN "${TMP_COOKBOOKS_DIR}/installers/prometheus/node-exporter/node-exporter-install.sh" "${NODE_EXPORTER_VERSION}"
+# configure tech-user
+RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "/var/log" "/service" "/usr/local/bin" 
 # clean up build & tmp files
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
     && rm -rf "${TMP_COOKBOOKS_DIR}"

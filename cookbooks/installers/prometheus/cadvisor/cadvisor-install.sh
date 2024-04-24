@@ -17,6 +17,4 @@ wget https://github.com/google/cadvisor/releases/download/v0.47.2/cadvisor-v${CA
 chmod +x /tmp/cadvisor/cadvisor-v${CADVISOR_VERSION}-linux-amd64
 mv /tmp/cadvisor/cadvisor-v${CADVISOR_VERSION}-linux-amd64 /usr/local/bin/cadvisor
 
-chown -R ${TECH_USER_NAME}:${TECH_USER_NAME} /usr/local/bin /service
-
 rm -rf /tmp/cadvisor

@@ -17,6 +17,4 @@ wget https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPOR
 tar -xvzf /tmp/node-exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz -C /tmp/node-exporter
 mv /tmp/node-exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter /usr/local/bin/
 
-chown -R ${TECH_USER_NAME}:${TECH_USER_NAME} /usr/local/bin /service
-
 rm -rf /tmp/node-exporter

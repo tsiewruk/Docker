@@ -17,6 +17,4 @@ wget https://github.com/prometheus/blackbox_exporter/releases/download/v${BLACKB
 tar -xvzf /tmp/blackbox/blackbox_exporter-${BLACKBOX_VERSION}.linux-amd64.tar.gz -C /tmp/blackbox
 mv /tmp/blackbox/blackbox_exporter-${BLACKBOX_VERSION}.linux-amd64/blackbox_exporter /usr/local/bin/
 
-chown -R ${TECH_USER_NAME}:${TECH_USER_NAME} /usr/local/bin /service
-
 rm -rf /tmp/blackbox

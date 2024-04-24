@@ -18,6 +18,6 @@ tar -xvzf /tmp/alertmanager/alertmanager-${ALERTMANAGER_VERSION}.linux-amd64.tar
 mkdir -p /etc/alert-manager /etc/alert-manager/data
 mv /tmp/alertmanager/alertmanager-${ALERTMANAGER_VERSION}.linux-amd64/{alertmanager,amtool} /usr/local/bin/
 
-chown -R ${TECH_USER_NAME}:${TECH_USER_NAME} /usr/local/bin /service /etc/alert-manager
-
 rm -rf /tmp/alertmanager
+
+sed -i "s|<ALERT_MANAGER_URL>|${ALERT_MANAGER_URL}|" /service/alert-manager/run 

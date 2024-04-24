@@ -2,11 +2,11 @@
 
 set -e
 
-if [ ! -f "/etc/entrypoint-scripts.env" ]; then
-    touch /etc/entrypoint-scripts.env
-    echo "export a_configure_grafana=1" >> /etc/entrypoint-scripts.env
+if [ ! -f "/usr/local/bin/entrypoint-scripts.env" ]; then
+    touch /usr/local/bin/entrypoint-scripts.env
+    echo "export a_configure_grafana=1" >> /usr/local/bin/entrypoint-scripts.env
 fi
-. /etc/entrypoint-scripts.env
+. /usr/local/bin/entrypoint-scripts.env
 
 env_array=( $(env | sort) )
 entrypoint_scripts_path='/usr/local/bin/entrypoint-scripts/'
@@ -17,6 +17,6 @@ for var in "${env_array[@]}"; do
         [ -x "${entrypoint_scripts_path}${env_name}.sh" ] && "${entrypoint_scripts_path}${env_name}.sh"
     fi
 done
-. /etc/entrypoint-scripts.env
+. /usr/local/bin/entrypoint-scripts.env
 
 exec s6-svscan -t0 /service

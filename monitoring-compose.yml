@@ -20,6 +20,8 @@ services:
     restart: unless-stopped
     cpu_shares: 128
     mem_limit: 128M
+    environment:
+    - ALERT_MANAGER_URL="alert-manager.local"
     #    volumes:
     #      - alertmanager_volume:/data
     networks:
@@ -140,6 +142,8 @@ services:
     restart: unless-stopped
     cpu_shares: 512
     mem_limit: 512M
+    environment:
+    - PROMETHEUS_URL="prometheus.local"
     volumes:
     - prometheus_volume:/etc/prometheus/
     networks:

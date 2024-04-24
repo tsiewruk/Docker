@@ -18,6 +18,4 @@ tar -xvzf /tmp/prometheus/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz -C
 mkdir -p /etc/prometheus
 mv /tmp/prometheus/prometheus-${PROMETHEUS_VERSION}.linux-amd64/* /usr/local/bin/
 
-chown -R ${TECH_USER_NAME}:${TECH_USER_NAME} /usr/local/bin /service /etc/prometheus
-
 rm -rf /tmp/prometheus

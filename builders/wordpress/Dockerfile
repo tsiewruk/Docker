@@ -21,8 +21,8 @@ COPY "${image_builder_dir}/files" /
 
 # install requirements
 RUN chmod 777 /tmp
-# configure tech user
-RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
+# create tech-user
+RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/add-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
 # install & configure nginx
 RUN "${TMP_COOKBOOKS_DIR}/installers/nginx/nginx-install.sh" \
     && install -d -o www-data -g www-data -m 750 "${APP_PATH}" \
@@ -49,7 +49,9 @@ RUN "${TMP_COOKBOOKS_DIR}/installers/php/fpm/php-install.sh" "${PHP_VERSION}" \
     && mv "/etc/php/${PHP_VERSION}/fpm/php-fpm.conf-custom" "etc/php/${PHP_VERSION}/fpm/php-fpm.conf" \
     && mv "/etc/php/${PHP_VERSION}/fpm/php.ini-custom" "/etc/php/${PHP_VERSION}/fpm/php.ini"
 # install wordpress
-RUN "${TMP_COOKBOOKS_DIR}/installers/wordpress/wordpress-install.sh" ${WORDPRESS_VERSION}                                                 
+RUN "${TMP_COOKBOOKS_DIR}/installers/wordpress/wordpress-install.sh" ${WORDPRESS_VERSION}
+# configure tech-user
+RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "/etc/wordpress" "/var/log" "/service" "/usr/local/bin"                                              
 # clean up build & tmp files
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
     && rm -rf "${TMP_COOKBOOKS_DIR}"

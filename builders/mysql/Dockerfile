@@ -17,10 +17,12 @@ COPY "${image_builder_dir}/files" /
 
 # install requirements
 RUN chmod 777 /tmp
-# configure tech user
-RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
+# create tech-user
+RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/add-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
 # install mysql
 RUN "${TMP_COOKBOOKS_DIR}/installers/mysql/mysql-install.sh" ${MYSQL_VERSION} ${MYSQL_ROOT_PASS} 
+# configure tech-user
+RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "/etc/mysql" "/var/log" "/service" "/usr/local/bin" 
 # clean up build & tmp files
 RUN "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" \
     && rm -rf "${TMP_COOKBOOKS_DIR}"

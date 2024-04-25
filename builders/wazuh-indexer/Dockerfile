@@ -16,8 +16,8 @@ COPY "${image_builder_dir}/files" /
 
 # install requirements
 RUN chmod 777 /tmp
-# configure tech user
-RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
+# create tech-user
+RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/add-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}"
 # install wazuh-indexer
 RUN "${TMP_COOKBOOKS_DIR}/installers/wazuh/wazuh-indexer/wazuh-indexer-install.sh" "${WAZUH_INDEXER_VERSION}"
 # clean up build & tmp files

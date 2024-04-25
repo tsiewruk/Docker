@@ -2,21 +2,22 @@
 
 set -e
 
-if [ ! -f "/etc/entrypoint-scripts.env" ]; then
-    touch /etc/entrypoint-scripts.env
-    echo "export a_configure_mysql=1" >> /etc/entrypoint-scripts.env
+ENV_FILE="/usr/local/bin/entrypoint-scripts.env"
+SCRIPTS_PATH="/usr/local/bin/entrypoint-scripts/"
+
+if [ ! -f "${ENV_FILE}" ]; then
+    touch "${ENV_FILE}"
+    echo "export a_clone_config=1" >> "${ENV_FILE}"
 fi
-. /etc/entrypoint-scripts.env
+source "$ENV_FILE"
 
 env_array=( $(env | sort) )
-entrypoint_scripts_path='/usr/local/bin/entrypoint-scripts/'
-
 for var in "${env_array[@]}"; do
     if [ "${var: -1}" = "1" ]; then
         env_name=$(echo ${var:0:-2})
-        [ -x "${entrypoint_scripts_path}${env_name}.sh" ] && "${entrypoint_scripts_path}${env_name}.sh"
+        [ -x "${SCRIPTS_PATH}${env_name}.sh" ] && "${SCRIPTS_PATH}${env_name}.sh"
     fi
 done
-. /etc/entrypoint-scripts.env
+source "${ENV_FILE}"
 
 exec s6-svscan -t0 /service

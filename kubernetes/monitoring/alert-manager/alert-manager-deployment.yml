@@ -20,8 +20,8 @@ spec:
         fsGroup: 10001
       containers:
       - name: alert-manager
-        image: alert-manager:latest
-        imagePullPolicy: Always
+        image: localhost:5000/alert-manager:latest
+        # imagePullPolicy: Always
         ports:
         - name: http
           containerPort: 9093
@@ -33,13 +33,13 @@ spec:
           limits:
             memory: "250Mi"
             cpu: "100m"
-        # readinessProbe:
-        #   httpGet:
-        #     scheme: HTTP
-        #     path: /index.html
-        #     port: http
-        #   initialDelaySeconds: 10
-        #   periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /-/ready
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 3
         livenessProbe:
           failureThreshold: 3
           initialDelaySeconds: 30

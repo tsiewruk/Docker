@@ -20,7 +20,7 @@ spec:
         fsGroup: 10001
       containers:
       - name: grafana
-        image: grafana:latest
+        image: localhost:5000/grafana:latest
         imagePullPolicy: Always
         ports:
         - name: http
@@ -33,13 +33,13 @@ spec:
           limits:
             memory: "750Mi"
             cpu: "250m"
-        # readinessProbe:
-        #   httpGet:
-        #     scheme: HTTP
-        #     path: /index.html
-        #     port: http
-        #   initialDelaySeconds: 10
-        #   periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /healthz
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 3
         livenessProbe:
           failureThreshold: 3
           initialDelaySeconds: 30

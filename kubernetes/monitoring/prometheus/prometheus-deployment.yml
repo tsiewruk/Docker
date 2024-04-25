@@ -20,7 +20,7 @@ spec:
         fsGroup: 10001
       containers:
       - name: prometheus
-        image: prometheus:latest
+        image: localhost:5000/prometheus:latest
         imagePullPolicy: Always
         ports:
         - name: http
@@ -33,13 +33,13 @@ spec:
           limits:
             memory: "750Mi"
             cpu: "250m"
-        # readinessProbe:
-        #   httpGet:
-        #     scheme: HTTP
-        #     path: /index.html
-        #     port: http
-        #   initialDelaySeconds: 10
-        #   periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /status
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 3
         livenessProbe:
           failureThreshold: 3
           initialDelaySeconds: 30

@@ -109,6 +109,20 @@ services:
     image: "grafana:latest"
     container_name: grafana
     hostname: grafana
+    environment:
+      - grafana_organization_name='MY_ORGANIZATION'
+      - grafana_organization_theme='dark'
+      - grafana_organization_weekstart='monday'
+      - grafana_organization_timezone='Europe/Warsaw'
+      - grafana_admin_name='Admin'
+      - grafana_admin_login='admin'
+      - grafana_admin_old_password='admin'
+      - grafana_admin_password='password'
+      - grafana_admin_email='email@email.com'
+      - smtp_user='user'
+      - smtp_password='password'
+      - smtp_email='email@email.com'
+      - instance_name='Grafana Monitoring'
     ports:
       - "3000:3000"
     volumes:

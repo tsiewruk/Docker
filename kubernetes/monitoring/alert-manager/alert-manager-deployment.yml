@@ -21,7 +21,7 @@ spec:
       containers:
       - name: alert-manager
         image: localhost:5000/alert-manager:latest
-        # imagePullPolicy: Always
+        imagePullPolicy: Always
         ports:
         - name: http
           containerPort: 9093
@@ -48,3 +48,9 @@ spec:
           tcpSocket:
             port: 9093
           timeoutSeconds: 1
+        env:
+        - name: ALERTMANAGER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: alert-manager-configmap
+              key: ALERTMANAGER_URL

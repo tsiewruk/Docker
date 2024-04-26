@@ -48,6 +48,72 @@ spec:
           tcpSocket:
             port: 3000
           timeoutSeconds: 1
+        env:
+        - name: grafana_organization_name
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-configmap
+              key: grafana_organization_name
+        - name: grafana_organization_theme
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-configmap
+              key: grafana_organization_theme
+        - name: grafana_organization_weekstart
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-configmap
+              key: grafana_organization_weekstart
+        - name: grafana_organization_timezone
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-configmap
+              key: grafana_organization_timezone
+        - name: instance_name
+          valueFrom:
+            configMapKeyRef:
+              name: grafana-configmap
+              key: instance_name
+        - name: grafana_admin_name
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: grafana_admin_name
+        - name: grafana_admin_login
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: grafana_admin_login
+        - name: grafana_admin_old_password
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: grafana_admin_old_password
+        - name: grafana_admin_password
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: grafana_admin_password
+        - name: grafana_admin_email
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: grafana_admin_email
+        - name: smtp_user
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: smtp_user
+        - name: smtp_password
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: smtp_password
+        - name: smtp_email
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secret
+              key: smtp_email
       #   volumeMounts:
       #     - mountPath: /var/lib/grafana
       #       name: grafana-pv

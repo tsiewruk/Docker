@@ -21,7 +21,7 @@ services:
     cpu_shares: 128
     mem_limit: 128M
     environment:
-    - ALERT_MANAGER_URL="alert-manager.local"
+    - ALERTMANAGER_URL=alert-manager.local
     #    volumes:
     #      - alertmanager_volume:/data
     networks:
@@ -143,7 +143,7 @@ services:
     cpu_shares: 512
     mem_limit: 512M
     environment:
-    - PROMETHEUS_URL="prometheus.local"
+    - PROMETHEUS_URL=prometheus.local
     volumes:
     - prometheus_volume:/etc/prometheus/
     networks:
@@ -167,6 +167,20 @@ services:
     restart: unless-stopped
     cpu_shares: 512
     mem_limit: 512M
+    environment:
+    - grafana_organization_name='MY_ORGANIZATION'
+    - grafana_organization_theme='dark'
+    - grafana_organization_weekstart='monday'
+    - grafana_organization_timezone='Europe/Warsaw'
+    - grafana_admin_name='Admin'
+    - grafana_admin_login='admin'
+    - grafana_admin_old_password='admin'
+    - grafana_admin_password='password'
+    - grafana_admin_email='email@email.com'
+    - smtp_user='user'
+    - smtp_password='password'
+    - smtp_email='email@email.com'
+    - instance_name='Grafana Monitoring'
     networks:
     - monitoring-vn
     volumes:

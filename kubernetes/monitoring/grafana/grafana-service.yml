@@ -9,4 +9,4 @@ spec:
     targetPort: 3000
   selector:
     app: grafana
-  type: ClusterIP
+  type: LoadBalancer

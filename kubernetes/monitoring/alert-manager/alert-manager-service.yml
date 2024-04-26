@@ -9,4 +9,4 @@ spec:
     targetPort: 9093
   selector:
     app: alert-manager
-  type: ClusterIP
+  type: LoadBalancer

@@ -4,7 +4,7 @@ metadata:
   name: cadvisor-ingress
   namespace: grafana
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
 spec:
   rules:
   - host: cadvisor.local

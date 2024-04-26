@@ -48,3 +48,9 @@ spec:
           tcpSocket:
             port: 9090
           timeoutSeconds: 1
+        env:
+        - name: PROMETHEUS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: prometheus-configmap
+              key: PROMETHEUS_URL

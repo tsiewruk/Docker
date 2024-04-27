@@ -354,14 +354,15 @@ services:
     container_name: wazuh-server
     hostname: wazuh-server
     ports:
-      - "9200:9200"
+    - "1516:1516"
+    - "55000:55000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-server.rule=Host(`wazuh-server.local`)"
       - "traefik.http.routers.wazuh-server.service=wazuh-server"
       - "traefik.http.routers.wazuh-server.tls=true"
       - "traefik.http.routers.wazuh-server.priority=10"
-      - "traefik.http.services.wazuh-server.loadbalancer.server.port=9200"
+      - "traefik.http.services.wazuh-server.loadbalancer.server.port=1516"
     stdin_open: true
     tty: true
 

@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wazuh-dashboard-ingress
+  namespace: wazuh
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: wazuh-dashboard.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: wazuh-dashboard-service
+            port:
+              number: 443

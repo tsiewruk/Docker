@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wazuh-server-service
+  namespace: wazuh
+spec:
+  ports:
+  - name: registration
+    port: 1515
+    targetPort: 1515
+  - name: api
+    port: 55000
+    targetPort: 55000
+  selector:
+    app: wazuh
+  type: LoadBalancer

@@ -9,7 +9,7 @@ if [ ! -f "${ENV_FILE}" ]; then
     touch "${ENV_FILE}"
     echo "export a_configure_grafana=1" >> "${ENV_FILE}"
 fi
-source "$ENV_FILE"
+source "${ENV_FILE}"
 
 env_array=( $(env | sort) )
 for var in "${env_array[@]}"; do

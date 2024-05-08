@@ -62,7 +62,7 @@ services:
         PYTHON_VERSION: 3.9
         TERRAFORM_VERSION: 1.3.7
         OPEN_TOFU_VERSION: 1.6.2
-        HELM_VERSION: 3.13.4
+        HELM_VERSION: 3.14.4
       dockerfile: builders/dev-container/Dockerfile
     image: "dev-container:latest"
     hostname: dev-container

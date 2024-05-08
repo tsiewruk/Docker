@@ -4,8 +4,6 @@ set -e
 
 . "${TMP_COOKBOOKS_DIR}/source/font.sh"
 
-TZ="${1}"
-
 ####################################
 echo-info "Cleaning"
 ####################################

@@ -1,0 +1,67 @@
+prometheus:
+  name: prometheus
+  namespace: prometheus
+  replicaCount: 1
+  image:
+    repository: k8smaestro/shipy-shipmanagementapi
+    pullPolicy: IfNotPresent
+    tag: "1.2"
+
+  container:
+    name: ""
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  securityContext:
+    runAsUser: 10000
+    runAsNonRoot: true
+    runAsGroup: 10001
+    fsGroup: 10001
+
+  containerPort: 9090
+  protocol: TCP
+
+  livenessProbe:
+    enabled: true
+    path: "/healtz"
+    port: "http"
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  readinessProbe:
+    enabled: true
+    path: "/healtz"
+    port: "http"
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+  environment:
+    - name: RabbitMQPublisher__Host
+      value: "{{ .Release.Name }}-rabbitmq"
+
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 5000
+
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 64m
+    limits:
+      memory: 128Mi
+      cpu: 256m
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+xd:
+  replicaCount: 50
+

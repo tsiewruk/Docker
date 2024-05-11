@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: alert-manager-configmap
-  namespace: grafana
-data:
-  ALERTMANAGER_URL: "alert-manager.local"

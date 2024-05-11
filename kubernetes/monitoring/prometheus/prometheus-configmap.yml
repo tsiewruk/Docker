@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prometheus-configmap
-  namespace: grafana
-data:
-  PROMETHEUS_URL: "prometheus.local"

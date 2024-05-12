@@ -19,6 +19,8 @@ COPY "${image_builder_dir}/files" /
 
 # additional requirements
 RUN chmod 777 /tmp
+# install git
+RUN "${TMP_COOKBOOKS_DIR}/installers/git/git-install.sh"
 # install openssh-server
 RUN "${TMP_COOKBOOKS_DIR}/installers/openssh/server/openssh-install.sh"
 # install python

@@ -1,0 +1,53 @@
+version: "3.7"
+
+volumes:
+  postgres_volume:
+  pgadmin_volume:
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: unless-stopped
+    cpu_shares: 512
+    mem_limit: 512M
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+    - postgres_volume:/var/lib/postgresql/data
+    ports:
+    - "5432:5432"
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.postgres.rule=Host(`postgres.local`)"
+    - "traefik.http.routers.postgres.service=postgres"
+    - "traefik.http.routers.postgres.tls=true"
+    - "traefik.http.routers.postgres.priority=10"
+    - "traefik.http.services.postgres.loadbalancer.server.port=5432"
+    stdin_open: true
+    tty: true
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    hostname: pgadmin
+    restart: unless-stopped
+    cpu_shares: 256
+    mem_limit: 256M
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@ad.min
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+    - pgadmin_volume:/var/lib/pgadmin
+    ports:
+    - "8080:80"
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.local`)"
+    - "traefik.http.routers.pgadmin.service=pgadmin"
+    - "traefik.http.routers.pgadmin.tls=true"
+    - "traefik.http.routers.pgadmin.priority=10"
+    - "traefik.http.services.pgadmin.loadbalancer.server.port=8080"
+    stdin_open: true
+    tty: true

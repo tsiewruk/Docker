@@ -7,8 +7,8 @@ source ${source_dir}/../../source/font.sh
 
 SERVICE="${1}"
 
-s6-svc -u "/services/${SERVICE}"
-if s6-svstat "/services/${SERVICE}" | grep -q '^up'; then
+s6-svc -u "/service/${SERVICE}"
+if s6-svstat "/service/${SERVICE}" | grep -q '^up'; then
   echo-success "Service ${SERVICE} up"
   echo-info "Service ${SERVICE} is up, PID>" `ps auxf | grep ${SERVICE} | awk '{print $2}' | head -n1`
 else

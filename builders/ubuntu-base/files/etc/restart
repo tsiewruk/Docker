@@ -7,10 +7,35 @@ source ${source_dir}/../../source/font.sh
 
 SERVICE="${1}"
 
-s6-svc -t "/services/${SERVICE}"
-if s6-svstat "/services/${SERVICE}" | grep -q '^up'; then
-  echo-success "Service ${SERVICE} restarted"
-  echo-info "Service ${SERVICE} is up, PID>" `ps auxf | grep ${SERVICE} | awk '{print $2}' | head -n1`
+if [ -z "${SERVICE}" ]; then
+  echo-error "Usage: restart <service_name>"
+  exit 1
+fi
+
+echo-info "Restarting service: ${SERVICE}"
+
+# Stop service gracefully
+s6-svc -d "/service/${SERVICE}"
+sleep 2
+
+# Check if stopped
+if s6-svstat "/service/${SERVICE}" | grep -q '^down'; then
+  echo-success "Service ${SERVICE} stopped"
 else
-  echo-error "Service ${SERVICE} is not up!"
+  echo-warning "Service ${SERVICE} still running, forcing stop..."
+  s6-svc -k "/service/${SERVICE}"
+  sleep 1
+fi
+
+# Start service
+s6-svc -u "/service/${SERVICE}"
+sleep 2
+
+# Verify restart
+if s6-svstat "/service/${SERVICE}" | grep -q '^up'; then
+  echo-success "Service ${SERVICE} restarted successfully"
+  echo-info "Service ${SERVICE} PID: $(ps auxf | grep ${SERVICE} | grep -v grep | awk '{print $2}' | head -n1)"
+else
+  echo-error "Failed to restart service ${SERVICE}"
+  exit 1
 fi

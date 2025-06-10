@@ -7,8 +7,8 @@ source ${source_dir}/../../source/font.sh
 
 SERVICE="${1}"
 
-s6-svc -d "/services/${SERVICE}"
-if s6-svstat "/services/${SERVICE}" | grep -q '^down'; then
+s6-svc -d "/service/${SERVICE}"
+if s6-svstat "/service/${SERVICE}" | grep -q '^down'; then
   echo-success "Service ${SERVICE} - stopped"
 else
   echo-error "Service ${SERVICE} is not stopped!"

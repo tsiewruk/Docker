@@ -1,0 +1,60 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Node.js (if applicable)
+node_modules/
+npm-debug.log*
+
+# Python (if applicable)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Secrets (CRITICAL!)
+secrets/
+*.key
+*.pem
+*.crt
+
+# Volume data
+volume/
+
+# Build artifacts
+*.tar
+*.zip
+*.gz 

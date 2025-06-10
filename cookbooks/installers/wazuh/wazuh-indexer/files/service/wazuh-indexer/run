@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+# Set environment variables for OpenSearch/Elasticsearch
+export OPENSEARCH_JAVA_HOME="/usr/share/wazuh-indexer/jdk"
+export OPENSEARCH_PATH_CONF="/etc/wazuh-indexer"
+export OPENSEARCH_HOME="/usr/share/wazuh-indexer"
+
+# Set JVM options for better performance and security
+export ES_JAVA_OPTS="-Xms1g -Xmx1g -Djava.security.policy=/etc/wazuh-indexer/opensearch.policy"
+
+# Change to wazuh-indexer directory
+cd /usr/share/wazuh-indexer
+
+# Start wazuh-indexer (OpenSearch)
+exec /usr/share/wazuh-indexer/bin/opensearch 

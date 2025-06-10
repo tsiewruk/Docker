@@ -4,8 +4,8 @@ set -e
 
 . "${TMP_COOKBOOKS_DIR}/source/font.sh"
 
-#source_dir=$(dirname $(readlink -f "$0"))
-#cp -R "${source_dir}/files/service" /
+source_dir=$(dirname $(readlink -f "$0"))
+cp -R "${source_dir}/files/service" /
 
 WAZUH_DASHBOARD_VERSION="${1}"
 

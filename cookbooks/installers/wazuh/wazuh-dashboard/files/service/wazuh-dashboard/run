@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+# Set environment variables
+export NODE_OPTIONS="--max-old-space-size=4096"
+export OPENSEARCH_DASHBOARDS_PATH_CONF="/etc/wazuh-dashboard"
+
+# Change to wazuh-dashboard directory
+cd /usr/share/wazuh-dashboard
+
+# Start wazuh-dashboard
+exec /usr/share/wazuh-dashboard/bin/opensearch-dashboards \
+    --config /etc/wazuh-dashboard/opensearch_dashboards.yml \
+    --logging.dest /var/log/wazuh-dashboard/wazuh-dashboard.log 

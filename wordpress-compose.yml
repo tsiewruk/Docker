@@ -1,15 +1,26 @@
-version: "3.8"
+# ===== SECRETS MANAGEMENT =====
+secrets:
+  mysql_root_password:
+    file: ./secrets/mysql_root_password.txt
+  wordpress_db_password:
+    file: ./secrets/wordpress_db_password.txt
 
+# ===== NETWORKS MANAGEMENT =====
 networks:
   default-vn:
     external: true
+  web:
+    driver: bridge
+    internal: false
 
+# ===== VOLUMES MANAGEMENT =====
 volumes:
   wordpress_volume:
     external: true
   mysql_volume:
     external: true
 
+# ===== SERVICES MANAGEMENT =====
 services:
   ubuntu-base:
     build:
@@ -19,6 +30,19 @@ services:
         image_builder_dir: ./builders/ubuntu-base
       dockerfile: builders/ubuntu-base/Dockerfile
     image: "ubuntu-base:latest"
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    # Security
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
     stdin_open: true
     tty: true
 
@@ -33,6 +57,20 @@ services:
     image: "traefik:latest"
     container_name: traefik
     hostname: traefik
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     environment:
     - TRAEFIK_CONFIG=local
     - CERT_CONFIG=local
@@ -40,13 +78,24 @@ services:
     - "80:80"
     - "443:443"
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
+    - /var/run/docker.sock:/var/run/docker.sock:ro 
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.traefik.rule=Host(`traefik.local`)"
     - "traefik.http.routers.traefik.service=api@internal"
     - "traefik.http.routers.traefik.tls=true"
     - "traefik.http.routers.traefik.priority=1"
+    networks:
+      - default-vn
+      - web
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -55,19 +104,42 @@ services:
     container_name: wordpress
     hostname: wordpress
     restart: unless-stopped
-    cpu_shares: 128
-    mem_limit: 256M
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # Security 
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     networks:
     - default-vn
+    - web
     ports:
-    - "80:80"
-    - "443:443"
+    - "8085:80"
+    - "8445:443" 
     environment:
       WORDPRESS_DB_HOST: mysql:3306
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-      #    volumes:
-      #      - wordpress_volume:/var/www/data/wordpress
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/wordpress_db_password
+      WORDPRESS_DB_NAME: wordpress
+    secrets:
+      - wordpress_db_password
+    volumes:
+      - wordpress_volume:/var/www/html
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/wp-admin/install.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.wordpress.rule=Host(`wordpress.local`)"
@@ -75,9 +147,9 @@ services:
     - "traefik.http.routers.wordpress.tls=true"
     - "traefik.http.routers.wordpress.priority=10"
     - "traefik.http.services.wordpress.loadbalancer.server.port=80"
-    #    depends_on:
-    #      - mysql
-    #      - traefik
+    depends_on:
+      - mysql
+      - traefik
     stdin_open: true
     tty: true
 
@@ -86,19 +158,42 @@ services:
     container_name: mysql
     hostname: mysql
     restart: unless-stopped
-    cpu_shares: 128
-    mem_limit: 256M
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.75'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     networks:
     - default-vn
+    - web
     ports:
     - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
-      #    volumes:
-      #      - mysql_volume:/var/lib/mysql
+      MYSQL_PASSWORD_FILE: /run/secrets/wordpress_db_password
+    secrets:
+      - mysql_root_password
+      - wordpress_db_password
+    volumes:
+      - mysql_volume:/var/lib/mysql
+    # Health check
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$(cat /run/secrets/mysql_root_password)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     depends_on:
     - traefik
     stdin_open: true

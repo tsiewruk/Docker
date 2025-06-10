@@ -1,23 +1,53 @@
-version: "3.7"
+# ===== SECRETS MANAGEMENT =====
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  pgadmin_password:
+    file: ./secrets/pgadmin_password.txt
 
+# ===== VOLUMES MANAGEMENT =====
 volumes:
   postgres_volume:
+    driver: local
   pgadmin_volume:
+    driver: local
 
+# ===== SERVICES MANAGEMENT =====
 services:
   postgres:
-    image: postgres
+    image: postgres:15-alpine 
     container_name: postgres
     restart: unless-stopped
-    cpu_shares: 512
-    mem_limit: 512M
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.75'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Security
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: postgres
+    secrets:
+      - postgres_password
     volumes:
     - postgres_volume:/var/lib/postgresql/data
     ports:
     - "5432:5432"
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.postgres.rule=Host(`postgres.local`)"
@@ -29,25 +59,47 @@ services:
     tty: true
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:latest
     container_name: pgadmin
     hostname: pgadmin
     restart: unless-stopped
-    cpu_shares: 256
-    mem_limit: 256M
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # Security
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@ad.min
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_password
+    secrets:
+      - pgadmin_password
     volumes:
     - pgadmin_volume:/var/lib/pgadmin
     ports:
-    - "8080:80"
+    - "8084:80"
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/misc/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.local`)"
     - "traefik.http.routers.pgadmin.service=pgadmin"
     - "traefik.http.routers.pgadmin.tls=true"
     - "traefik.http.routers.pgadmin.priority=10"
-    - "traefik.http.services.pgadmin.loadbalancer.server.port=8080"
+    - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+    depends_on:
+      - postgres
     stdin_open: true
     tty: true

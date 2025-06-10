@@ -1,9 +1,30 @@
-version: "3.7"
+# ===== SECRETS MANAGEMENT =====
+secrets:
+  grafana_admin_password:
+    file: ./secrets/grafana_admin_password.txt
+  grafana_smtp_password:
+    file: ./secrets/grafana_smtp_password.txt
+  mysql_root_password:
+    file: ./secrets/mysql_root_password.txt
+  wordpress_db_password:
+    file: ./secrets/wordpress_db_password.txt
+  rabbitmq_password:
+    file: ./secrets/rabbitmq_password.txt
+  jenkins_admin_password:
+    file: ./secrets/jenkins_admin_password.txt
 
+# ===== NETWORKS MANAGEMENT =====
 networks:
   default:
     driver: bridge
+  monitoring:
+    driver: bridge
+    internal: false
+  web:
+    driver: bridge
+    internal: false
 
+# ===== VOLUMES MANAGEMENT =====
 volumes:
   jenkins_volume:
     external: true
@@ -11,7 +32,10 @@ volumes:
     external: true
   prometheus_volume:
     external: true
+  mysql_data:
+    driver: local
 
+# ===== SERVICES MANAGEMENT =====
 services:
   ubuntu-base:
     build:
@@ -21,6 +45,19 @@ services:
         image_builder_dir: ./builders/ubuntu-base
       dockerfile: builders/ubuntu-base/Dockerfile
     image: "ubuntu-base:latest"
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # Security
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
     stdin_open: true
     tty: true
 
@@ -35,6 +72,20 @@ services:
     image: "traefik:latest"
     container_name: traefik
     hostname: traefik
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     environment:
       - TRAEFIK_CONFIG=local
       - CERT_CONFIG=local 
@@ -42,13 +93,25 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(`traefik.local`)" 
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.priority=1"
+    networks:
+      - default
+      - monitoring
+      - web
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -67,6 +130,20 @@ services:
     image: "dev-container:latest"
     hostname: dev-container
     container_name: dev-container
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     stdin_open: true
     tty: true
 
@@ -82,19 +159,43 @@ services:
     image: "jenkins:latest"
     hostname: jenkins
     container_name: jenkins
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.5'
+        reservations:
+          memory: 1G
+          cpus: '0.75'
+    # Security 
+    user: "1000:1000"
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
     ports:
-      - "8080:8080"
+      - "8081:8080"
       - "50000:50000"
     volumes:
       - jenkins_volume:/root/.jenkins
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/login"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jenkins.rule=Host(`jenkins.local`)"
       - "traefik.http.routers.jenkins.service=jenkins"
       - "traefik.http.routers.jenkins.tls=true"
       - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
-    privileged: true
+    networks:
+      - default
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -109,24 +210,45 @@ services:
     image: "grafana:latest"
     container_name: grafana
     hostname: grafana
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # Security 
+    user: "1000:1000"
+    secrets:
+      - grafana_admin_password
+      - grafana_smtp_password
+    security_opt:
+      - no-new-privileges:true
     environment:
-      - grafana_organization_name='MY_ORGANIZATION'
-      - grafana_organization_theme='dark'
-      - grafana_organization_weekstart='monday'
-      - grafana_organization_timezone='Europe/Warsaw'
-      - grafana_admin_name='Admin'
-      - grafana_admin_login='admin'
-      - grafana_admin_old_password='admin'
-      - grafana_admin_password='password'
-      - grafana_admin_email='email@email.com'
-      - smtp_user='user'
-      - smtp_password='password'
-      - smtp_email='email@email.com'
-      - instance_name='Grafana Monitoring'
+      - grafana_organization_name=MY_ORGANIZATION
+      - grafana_organization_theme=dark
+      - grafana_organization_weekstart=monday
+      - grafana_organization_timezone=Europe/Warsaw
+      - grafana_admin_name=Admin
+      - grafana_admin_login=admin
+      - grafana_admin_old_password=admin
+      - grafana_admin_email=admin@example.com
+      - smtp_user=monitoring
+      - smtp_email=monitoring@example.com
+      - instance_name=Grafana Monitoring
     ports:
       - "3000:3000"
     volumes:
       - grafana_volume:/var/lib/grafana
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`grafana.local`)"
@@ -134,6 +256,9 @@ services:
       - "traefik.http.routers.grafana.tls=true"
       - "traefik.http.routers.grafana.priority=10"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    networks:
+      - monitoring
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -148,12 +273,33 @@ services:
     image: "prometheus:latest"
     container_name: prometheus
     hostname: prometheus
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.75'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     environment:
     - PROMETHEUS_URL=prometheus.local
     ports:
       - "9090:9090"
     volumes:
       - prometheus_volume:/etc/prometheus/
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)" 
@@ -161,6 +307,9 @@ services:
       - "traefik.http.routers.prometheus.tls=true"
       - "traefik.http.routers.prometheus.priority=10"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    networks:
+      - monitoring
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -175,8 +324,24 @@ services:
     image: "cadvisor:latest"
     container_name: cadvisor
     hostname: cadvisor
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    # Security
+    user: "1000:1000"
+    cap_add:
+      - SYS_ADMIN
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
     ports:
-      - "8080:8080"
+      - "8082:8080"
     volumes:
       - "/var/run:/var/run:ro"
       - "/sys:/sys:ro"
@@ -184,11 +349,17 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "/etc/machine-id:/etc/machine-id:ro"
       - "/var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro"
-      - "/dev/disk/:/dev/disk"
-      - "/:/rootfs"
-    privileged: true
+      - "/dev/disk/:/dev/disk:ro"  # Added :ro for security
+      - "/:/rootfs:ro"
     devices:
-      - "/dev/kmsg"
+      - "/dev/kmsg:/dev/kmsg:r"
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.local`)"
@@ -196,6 +367,9 @@ services:
       - "traefik.http.routers.cadvisor.tls=true"
       - "traefik.http.routers.cadvisor.priority=10"
       - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
+    networks:
+      - monitoring
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -210,11 +384,32 @@ services:
     image: "node-exporter:latest"
     container_name: node-exporter
     hostname: node-exporter
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    # Security
+    read_only: true
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "9100:9100"
     volumes:
       - '/:/host:ro,rslave'
     pid: host
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9100/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.local`)"
@@ -222,6 +417,9 @@ services:
       - "traefik.http.routers.node-exporter.tls=true"
       - "traefik.http.routers.node-exporter.priority=10"
       - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
+    networks:
+      - monitoring
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -236,8 +434,29 @@ services:
     image: "mysql-exporter:latest"
     container_name: mysql-exporter
     hostname: mysql-exporter
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    # Security
+    read_only: true
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "9104:9104"
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9104/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.mysql-exporter.rule=Host(`mysql-exporter.local`)" 
@@ -245,6 +464,9 @@ services:
       - "traefik.http.routers.mysql-exporter.tls=true"
       - "traefik.http.routers.mysql-exporter.priority=10"
       - "traefik.http.services.mysql-exporter.loadbalancer.server.port=9104"
+    networks:
+      - monitoring
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -259,10 +481,31 @@ services:
     image: "alert-manager:latest"
     container_name: alert-manager
     hostname: alert-manager
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     environment:
     - ALERTMANAGER_URL=alert-manager.local
     ports:
       - "9093:9093"
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.alert-manager.rule=Host(`alert-manager.local`)"
@@ -270,6 +513,9 @@ services:
       - "traefik.http.routers.alert-manager.tls=true"
       - "traefik.http.routers.alert-manager.priority=10"
       - "traefik.http.services.alert-manager.loadbalancer.server.port=9093"
+    networks:
+      - monitoring
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -284,8 +530,29 @@ services:
     image: "blackbox:latest"
     container_name: blackbox
     hostname: blackbox
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    # Security
+    read_only: true
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "9115:9115"
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9115/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.blackbox.rule=Host(`blackbox.local`)" 
@@ -293,6 +560,9 @@ services:
       - "traefik.http.routers.blackbox.tls=true"
       - "traefik.http.routers.blackbox.priority=10"
       - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
+    networks:
+      - monitoring
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -307,15 +577,42 @@ services:
     image: "wazuh-dashboard:latest"
     container_name: wazuh-dashboard
     hostname: wazuh-dashboard
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.75'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     ports:
-      - "443:5601"
+      - "5601:5601"
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601/status"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`wazuh-dashboard.local`)"
       - "traefik.http.routers.wazuh-dashboard.service=wazuh-dashboard"
       - "traefik.http.routers.wazuh-dashboard.tls=true"
       - "traefik.http.routers.wazuh-dashboard.priority=10"
-      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=443"
+      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
+    networks:
+      - default
+    restart: unless-stopped
+    depends_on:
+      - wazuh-indexer
+      - wazuh-server
     stdin_open: true
     tty: true
 
@@ -330,8 +627,31 @@ services:
     image: "wazuh-indexer:latest"
     container_name: wazuh-indexer
     hostname: wazuh-indexer
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
     ports:
       - "9200:9200"
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-indexer.rule=Host(`wazuh-indexer.local`)"
@@ -339,6 +659,9 @@ services:
       - "traefik.http.routers.wazuh-indexer.tls=true"
       - "traefik.http.routers.wazuh-indexer.priority=10"
       - "traefik.http.services.wazuh-indexer.loadbalancer.server.port=9200"
+    networks:
+      - default
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -353,9 +676,30 @@ services:
     image: "wazuh-server:latest"
     container_name: wazuh-server
     hostname: wazuh-server
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.75'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     ports:
     - "1516:1516"
     - "55000:55000"
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:55000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-server.rule=Host(`wazuh-server.local`)"
@@ -363,6 +707,11 @@ services:
       - "traefik.http.routers.wazuh-server.tls=true"
       - "traefik.http.routers.wazuh-server.priority=10"
       - "traefik.http.services.wazuh-server.loadbalancer.server.port=1516"
+    networks:
+      - default
+    restart: unless-stopped
+    depends_on:
+      - wazuh-indexer
     stdin_open: true
     tty: true
 
@@ -374,8 +723,36 @@ services:
         image_builder_dir: ./builders/varnish
       dockerfile: builders/varnish/Dockerfile
     image: "varnish:latest"
+    container_name: varnish
+    hostname: varnish
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # Security
+    read_only: false
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
     environment:
       - VARNISH_CONFIG=default
+    ports:
+      - "6081:6081"
+    # Health check
+    healthcheck:
+      test: ["CMD", "varnishstat", "-1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - web
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -389,16 +766,44 @@ services:
     image: "rabbitmq:latest"
     container_name: rabbitmq
     hostname: rabbitmq
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.75'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Security
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS_FILE=/run/secrets/rabbitmq_password
+    secrets:
+      - rabbitmq_password
     ports:
       - "5672:5672"
       - "15672:15672"
       - "25672:25672"
+    # Health check
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.local`)"
       - "traefik.http.routers.rabbitmq.service=rabbitmq"
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+    networks:
+      - default
+    restart: unless-stopped
     stdin_open: true
     tty: true
 
@@ -414,15 +819,47 @@ services:
     image: "wordpress:latest"
     container_name: wordpress
     hostname: wordpress
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # Security
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - WORDPRESS_DB_HOST=mysql:3306
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD_FILE=/run/secrets/wordpress_db_password
+      - WORDPRESS_DB_NAME=wordpress
+    secrets:
+      - wordpress_db_password
     ports:
-      - "80:80"
-      - "443:443"
+      - "8083:80"
+      - "8443:443"  
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/wp-admin/install.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wordpress.rule=Host(`wordpress.local`)"
       - "traefik.http.routers.wordpress.service=wordpress"
       - "traefik.http.routers.wordpress.tls=true"
       - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+    networks:
+      - web
+    restart: unless-stopped
+    depends_on:
+      - mysql
     stdin_open: true
     tty: true
 
@@ -438,7 +875,40 @@ services:
     image: "mysql:latest"
     container_name: mysql
     hostname: mysql
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.75'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Security
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD_FILE=/run/secrets/wordpress_db_password
+    secrets:
+      - mysql_root_password
+      - wordpress_db_password
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # Health check
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$(cat /run/secrets/mysql_root_password)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - web
+    restart: unless-stopped
     stdin_open: true
     tty: true

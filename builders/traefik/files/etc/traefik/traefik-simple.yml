@@ -1,0 +1,29 @@
+# Global configuration
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+# API and dashboard configuration
+api:
+  dashboard: true
+  insecure: true  # Allow dashboard without authentication
+
+# Docker configuration backend
+providers:
+  docker:
+    exposedByDefault: false
+    endpoint: "unix:///var/run/docker.sock"
+
+# EntryPoints definition - only HTTP on port 80
+entryPoints:
+  web:
+    address: :80
+
+# Log information
+log:
+  level: INFO
+  format: common
+
+# Accesslog
+accesslog:
+  format: common

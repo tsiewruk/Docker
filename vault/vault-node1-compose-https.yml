@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Vault Node 1 - Leader
+  vault:
+    image: vault:1.15.2
+    container_name: vault-node1
+    hostname: vault-node1
+    cap_add:
+      - IPC_LOCK
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /vault/logs
+    environment:
+      - VAULT_ADDR=https://0.0.0.0:8200
+      - VAULT_API_ADDR=https://0.0.0.0:8200
+      - VAULT_CLUSTER_ADDR=https://0.0.0.0:8201
+    ports:
+      - "443:8200"
+      - "8201:8201"
+    volumes:
+      - vault-data:/vault/data
+      - ./vault-configs/node1-https.hcl:/vault/config/vault.hcl:ro
+      - ./vault-configs/tls:/vault/tls:ro
+    networks:
+      - vault-network
+    command: ["vault", "server", "-config=/vault/config/vault.hcl"]
+    restart: unless-stopped
+
+  # Load Balancer with HTTPS
+  vault-lb:
+    image: nginx:alpine
+    container_name: vault-lb
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./vault-configs/nginx-lb-https.conf:/etc/nginx/nginx.conf:ro
+      - ./vault-configs/tls:/etc/nginx/tls:ro
+    networks:
+      - vault-network
+    depends_on:
+      - vault
+    restart: unless-stopped
+
+volumes:
+  vault-data:
+    driver: local
+
+networks:
+  vault-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
+

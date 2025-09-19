@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Vault Node 2 - Follower
+  vault:
+    image: vault:1.15.2
+    container_name: vault-node2
+    hostname: vault-node2
+    cap_add:
+      - IPC_LOCK
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /vault/logs
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+      - VAULT_CLUSTER_ADDR=http://0.0.0.0:8201
+    ports:
+      - "8200:8200"
+      - "8201:8201"
+    volumes:
+      - vault-data:/vault/data
+      - ./vault-configs/node2.hcl:/vault/config/vault.hcl:ro
+    networks:
+      - vault-network
+    command: ["vault", "server", "-config=/vault/config/vault.hcl"]
+    restart: unless-stopped
+
+volumes:
+  vault-data:
+    driver: local
+
+networks:
+  vault-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.2.0/24

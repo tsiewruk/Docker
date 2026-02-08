@@ -26,9 +26,6 @@ RUN "${TMP_COOKBOOKS_DIR}/shared/installers/system/user/add/add-user.sh" "${TECH
     "${TMP_COOKBOOKS_DIR}/shared/installers/system/cleanup/build-cleanup.sh" && \
     rm -rf "${TMP_COOKBOOKS_DIR}"
 
-# Security: Use non-root user
-USER "${TECH_USER_NAME}":"${TECH_USER_NAME}"
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:9093/-/healthy || exit 1

@@ -25,9 +25,6 @@ RUN "${TMP_COOKBOOKS_DIR}/shared/installers/system/user/add/add-user.sh" "${TECH
     "${TMP_COOKBOOKS_DIR}/shared/installers/system/cleanup/build-cleanup.sh" && \
     rm -rf "${TMP_COOKBOOKS_DIR}"
 
-# Security: Use non-root user
-USER "${TECH_USER_NAME}":"${TECH_USER_NAME}"
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:6081/stats || exit 1

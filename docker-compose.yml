@@ -35,13 +35,25 @@ volumes:
   mysql_data:
     driver: local
 
+# ===== COMMON BUILD CONFIGURATION =====
+x-common-build: &common-build
+  context: .
+  args:
+    cookbooks_dir: ./cookbooks
+
+# ===== COMMON LOGGING CONFIGURATION =====
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 # ===== SERVICES MANAGEMENT =====
 services:
   ubuntu-base:
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/ubuntu-base
       dockerfile: builders/ubuntu-base/Dockerfile
     image: "ubuntu-base:latest"
@@ -58,14 +70,14 @@ services:
     read_only: false
     security_opt:
       - no-new-privileges:true
+    logging: *default-logging
     stdin_open: true
     tty: true
 
   traefik:
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/traefik
         TRAEFIK_VERSION: '2.10.4'
       dockerfile: builders/traefik/Dockerfile
@@ -88,7 +100,7 @@ services:
       - no-new-privileges:true
     environment:
       - TRAEFIK_CONFIG=local
-      - CERT_CONFIG=local 
+      - CERT_CONFIG=local
     ports:
       - "80:80"
       - "443:443"
@@ -103,23 +115,19 @@ services:
       start_period: 40s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.local`)" 
+      - "traefik.http.routers.traefik.rule=Host(`traefik.local`)"
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.priority=1"
     networks:
-      - default
-      - monitoring
       - web
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   dev-container:
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/dev-container
         ANSIBLE_VERSION: 2.9
         PYTHON_VERSION: 3.9
@@ -144,14 +152,14 @@ services:
     user: "1000:1000"
     security_opt:
       - no-new-privileges:true
+    logging: *default-logging
     stdin_open: true
     tty: true
 
   jenkins:
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/jenkins
         OPEN_JDK_VERSION: 17
         JENKINS_VERSION: 1
@@ -163,12 +171,12 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
-          cpus: '1.5'
+          memory: 3G
+          cpus: '2.0'
         reservations:
-          memory: 1G
-          cpus: '0.75'
-    # Security 
+          memory: 1.5G
+          cpus: '1.0'
+    # Security
     user: "1000:1000"
     cap_add:
       - SYS_ADMIN
@@ -178,7 +186,7 @@ services:
       - "8081:8080"
       - "50000:50000"
     volumes:
-      - jenkins_volume:/root/.jenkins
+      - jenkins_volume:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock:ro
     # Health check
     healthcheck:
@@ -195,15 +203,14 @@ services:
       - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
     networks:
       - default
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   grafana:
+    profiles: ["monitoring", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/grafana
         GRAFANA_VERSION: '10.1.4'
       dockerfile: builders/grafana/Dockerfile
@@ -219,7 +226,7 @@ services:
         reservations:
           memory: 256M
           cpus: '0.25'
-    # Security 
+    # Security
     user: "1000:1000"
     secrets:
       - grafana_admin_password
@@ -258,15 +265,14 @@ services:
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     networks:
       - monitoring
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   prometheus:
+    profiles: ["monitoring", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/prometheus
         PROMETHEUS_VERSION: 2.47.1
       dockerfile: builders/prometheus/Dockerfile
@@ -288,11 +294,13 @@ services:
     security_opt:
       - no-new-privileges:true
     environment:
-    - PROMETHEUS_URL=prometheus.local
+      - PROMETHEUS_URL=prometheus.local
     ports:
       - "9090:9090"
     volumes:
       - prometheus_volume:/etc/prometheus/
+    tmpfs:
+      - /tmp:size=100M,mode=1777
     # Health check
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
@@ -302,22 +310,21 @@ services:
       start_period: 60s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)" 
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)"
       - "traefik.http.routers.prometheus.service=prometheus"
       - "traefik.http.routers.prometheus.tls=true"
       - "traefik.http.routers.prometheus.priority=10"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     networks:
       - monitoring
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   cadvisor:
+    profiles: ["monitoring", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/cadvisor
         CADVISOR_VERSION: 0.47.2
       dockerfile: builders/cadvisor/Dockerfile
@@ -349,7 +356,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "/etc/machine-id:/etc/machine-id:ro"
       - "/var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro"
-      - "/dev/disk/:/dev/disk:ro"  # Added :ro for security
+      - "/dev/disk/:/dev/disk:ro"
       - "/:/rootfs:ro"
     devices:
       - "/dev/kmsg:/dev/kmsg:r"
@@ -369,15 +376,14 @@ services:
       - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
     networks:
       - monitoring
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   node-exporter:
+    profiles: ["monitoring", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/node-exporter
         NODE_EXPORTER_VERSION: 1.7.0
       dockerfile: builders/node-exporter/Dockerfile
@@ -419,15 +425,14 @@ services:
       - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
     networks:
       - monitoring
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   mysql-exporter:
+    profiles: ["monitoring", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/mysql-exporter
         MYSQL_EXPORTER_VERSION: 0.15.1
       dockerfile: builders/mysql-exporter/Dockerfile
@@ -459,22 +464,21 @@ services:
       start_period: 30s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mysql-exporter.rule=Host(`mysql-exporter.local`)" 
+      - "traefik.http.routers.mysql-exporter.rule=Host(`mysql-exporter.local`)"
       - "traefik.http.routers.mysql-exporter.service=mysql-exporter"
       - "traefik.http.routers.mysql-exporter.tls=true"
       - "traefik.http.routers.mysql-exporter.priority=10"
       - "traefik.http.services.mysql-exporter.loadbalancer.server.port=9104"
     networks:
       - monitoring
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   alert-manager:
+    profiles: ["monitoring", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/alert-manager
         ALERTMANAGER_VERSION: 0.26.0
       dockerfile: builders/alert-manager/Dockerfile
@@ -496,7 +500,7 @@ services:
     security_opt:
       - no-new-privileges:true
     environment:
-    - ALERTMANAGER_URL=alert-manager.local
+      - ALERTMANAGER_URL=alert-manager.local
     ports:
       - "9093:9093"
     # Health check
@@ -515,15 +519,14 @@ services:
       - "traefik.http.services.alert-manager.loadbalancer.server.port=9093"
     networks:
       - monitoring
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   blackbox:
+    profiles: ["monitoring", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/blackbox
         BLACKBOX_VERSION: 0.24.0
       dockerfile: builders/blackbox/Dockerfile
@@ -555,22 +558,21 @@ services:
       start_period: 30s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.blackbox.rule=Host(`blackbox.local`)" 
+      - "traefik.http.routers.blackbox.rule=Host(`blackbox.local`)"
       - "traefik.http.routers.blackbox.service=blackbox"
       - "traefik.http.routers.blackbox.tls=true"
       - "traefik.http.routers.blackbox.priority=10"
       - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
     networks:
       - monitoring
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   wazuh-dashboard:
+    profiles: ["security", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/wazuh-dashboard
         WAZUH_DASHBOARD_VERSION: 4.7
       dockerfile: builders/wazuh-dashboard/Dockerfile
@@ -609,18 +611,19 @@ services:
       - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
     networks:
       - default
+    logging: *default-logging
     restart: unless-stopped
     depends_on:
-      - wazuh-indexer
-      - wazuh-server
-    stdin_open: true
-    tty: true
+      wazuh-indexer:
+        condition: service_healthy
+      wazuh-server:
+        condition: service_healthy
 
   wazuh-indexer:
+    profiles: ["security", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/wazuh-indexer
         WAZUH_DASHBOARD_VERSION: 4.7
       dockerfile: builders/wazuh-indexer/Dockerfile
@@ -631,20 +634,22 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
-          cpus: '1.0'
+          memory: 3G
+          cpus: '1.5'
         reservations:
-          memory: 1G
-          cpus: '0.5'
+          memory: 2G
+          cpus: '0.75'
     # Security
     read_only: false
     user: "1000:1000"
     security_opt:
       - no-new-privileges:true
     environment:
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
     ports:
       - "9200:9200"
+    tmpfs:
+      - /tmp:size=100M,mode=1777
     # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
@@ -661,15 +666,14 @@ services:
       - "traefik.http.services.wazuh-indexer.loadbalancer.server.port=9200"
     networks:
       - default
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   wazuh-server:
+    profiles: ["security", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/wazuh-server
         WAZUH_SERVER_VERSION: 4.7
       dockerfile: builders/wazuh-server/Dockerfile
@@ -691,8 +695,8 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-    - "1516:1516"
-    - "55000:55000"
+      - "1516:1516"
+      - "55000:55000"
     # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:55000/"]
@@ -709,17 +713,17 @@ services:
       - "traefik.http.services.wazuh-server.loadbalancer.server.port=1516"
     networks:
       - default
+    logging: *default-logging
     restart: unless-stopped
     depends_on:
-      - wazuh-indexer
-    stdin_open: true
-    tty: true
+      wazuh-indexer:
+        condition: service_healthy
 
   varnish:
+    profiles: ["web", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/varnish
       dockerfile: builders/varnish/Dockerfile
     image: "varnish:latest"
@@ -752,15 +756,13 @@ services:
       start_period: 30s
     networks:
       - web
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   rabbitmq:
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/rabbitmq
       dockerfile: builders/rabbitmq/Dockerfile
     image: "rabbitmq:latest"
@@ -803,15 +805,14 @@ services:
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
     networks:
       - default
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   wordpress:
+    profiles: ["web", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/wordpress
         WORDPRESS_VERSION: 6.4.3
         PHP_VERSION: 8.2
@@ -841,7 +842,7 @@ services:
       - wordpress_db_password
     ports:
       - "8083:80"
-      - "8443:443"  
+      - "8443:443"
     # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/wp-admin/install.php"]
@@ -857,17 +858,17 @@ services:
       - "traefik.http.services.wordpress.loadbalancer.server.port=80"
     networks:
       - web
+    logging: *default-logging
     restart: unless-stopped
     depends_on:
-      - mysql
-    stdin_open: true
-    tty: true
+      mysql:
+        condition: service_healthy
 
   mysql:
+    profiles: ["web", "all"]
     build:
-      context: .
+      <<: *common-build
       args:
-        cookbooks_dir: ./cookbooks
         image_builder_dir: ./builders/mysql
         MYSQL_VERSION: 8.29-1
         MYSQL_ROOT_PASS: default
@@ -900,15 +901,18 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    shm_size: '256m'
+    tmpfs:
+      - /tmp:size=100M,mode=1777
+    command: --default-authentication-plugin=mysql_native_password --innodb-buffer-pool-size=512M
     # Health check
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$(cat /run/secrets/mysql_root_password)"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 60s
     networks:
       - web
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true

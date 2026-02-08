@@ -26,9 +26,6 @@ RUN "${TMP_COOKBOOKS_DIR}/shared/installers/system/user/add/add-user.sh" "${TECH
     "${TMP_COOKBOOKS_DIR}/shared/installers/system/cleanup/build-cleanup.sh" && \
     rm -rf "${TMP_COOKBOOKS_DIR}"
 
-# Security: Use non-root user
-USER "${TECH_USER_NAME}":"${TECH_USER_NAME}"
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
     CMD mysqladmin ping -h localhost || exit 1

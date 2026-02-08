@@ -1,4 +1,4 @@
-FROM ubuntu-base:latest
+FROM debian-base:latest
 
 # ARG from docker-compose
 ARG cookbooks_dir
@@ -27,12 +27,12 @@ COPY "${image_builder_dir}/files" /
 # Install everything in one optimized layer for smaller image
 RUN apt-get -y update && \
     apt-get -y install --no-install-recommends dpkg-dev && \
-    "${TMP_COOKBOOKS_DIR}/setters/user/add/add-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}" && \
-    "${TMP_COOKBOOKS_DIR}/installers/ssl/ssl-install.sh" "${SSL_VERSION}" && \
-    "${TMP_COOKBOOKS_DIR}/installers/erlang/erlang-install.sh" "${UBUNTU_RELEASE}" && \
-    "${TMP_COOKBOOKS_DIR}/installers/rabbitmq/rabbitmq-install.sh" "${UBUNTU_RELEASE}" && \
-    "${TMP_COOKBOOKS_DIR}/setters/user/add/configure-user.sh" "/etc/rabbitmq" "/var/log" "/service" "/usr/local/bin" && \
-    "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/system/user/add/add-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/ssl/ssl-install.sh" "${SSL_VERSION}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/erlang/erlang-install.sh" "${UBUNTU_RELEASE}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/rabbitmq/rabbitmq-install.sh" "${UBUNTU_RELEASE}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/system/user/add/configure-user.sh" "/etc/rabbitmq" "/var/log" "/service" "/usr/local/bin" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/system/cleanup/build-cleanup.sh" && \
     rm -rf "${TMP_COOKBOOKS_DIR}"
 
 # Security: Use non-root user

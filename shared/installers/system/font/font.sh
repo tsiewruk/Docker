@@ -1,10 +1,7 @@
 #!/bin/bash
 
-set -e
-
-####################################
-echo-info "Font installation"
-####################################
+# Logger functions for colored output in installation scripts
+# These functions are sourced globally in debian-base-image
 
 # Red color for error messages
 function echo-error {
@@ -25,7 +22,3 @@ function echo-success {
 function echo-normal {
     echo -e "\033[0m ${1}"
 }
-
-####################################
-echo-success "Font installation completed"
-####################################

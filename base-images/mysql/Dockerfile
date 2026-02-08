@@ -1,4 +1,4 @@
-FROM ubuntu-base:latest
+FROM debian-base:latest
 
 # ARG from docker-compose
 ARG cookbooks_dir
@@ -20,10 +20,10 @@ COPY "${cookbooks_dir}" "${TMP_COOKBOOKS_DIR}"
 COPY "${image_builder_dir}/files" /
 
 # Install everything in one optimized layer for smaller image
-RUN "${TMP_COOKBOOKS_DIR}/setters/user/add/add-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}" && \
-    "${TMP_COOKBOOKS_DIR}/installers/mysql/mysql-install.sh" ${MYSQL_VERSION} ${MYSQL_ROOT_PASS} && \
-    "${TMP_COOKBOOKS_DIR}/setters/user/add/config# Security: Use non-root userure-user.sh" "/etc/mysql" "/var/log" "/service" "/usr/local/bin" && \
-    "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" && \
+RUN "${TMP_COOKBOOKS_DIR}/shared/installers/system/user/add/add-user.sh" "${TECH_USER_NAME}" "${TECH_USER_GROUPS}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/mysql/mysql-install.sh" ${MYSQL_VERSION} ${MYSQL_ROOT_PASS} && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/system/user/add/configure-user.sh" "/etc/mysql" "/var/log" "/service" "/usr/local/bin" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/system/cleanup/build-cleanup.sh" && \
     rm -rf "${TMP_COOKBOOKS_DIR}"
 
 # Security: Use non-root user

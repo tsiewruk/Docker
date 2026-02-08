@@ -22,9 +22,18 @@ RUN apt-get update -y && \
     apt-get -y install --no-install-recommends \
         tzdata locales ca-certificates gnupg s6 curl wget \
     # Set timezone
-    "${TMP_COOKBOOKS_DIR}/setters/timezone/timezone-set.sh" "${TZ}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/system/timezone/timezone-set.sh" "${TZ}" && \
     # Set locales
     locale-gen en_US.UTF-8 pl_PL.UTF-8 && \
+    # Install logger functions globally
+    mkdir -p /usr/local/lib && \
+    cp "${TMP_COOKBOOKS_DIR}/shared/source/font.sh" /usr/local/lib/logger-functions.sh && \
+    chmod 644 /usr/local/lib/logger-functions.sh && \
+    # Make logger functions available in all shells
+    echo '. /usr/local/lib/logger-functions.sh' >> /etc/bash.bashrc && \
+    mkdir -p /etc/profile.d && \
+    echo '. /usr/local/lib/logger-functions.sh' > /etc/profile.d/logger.sh && \
+    chmod 644 /etc/profile.d/logger.sh && \
     # Clean up everything in one layer
     rm -rf "${TMP_COOKBOOKS_DIR}"
 

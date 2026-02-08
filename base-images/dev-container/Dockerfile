@@ -1,4 +1,4 @@
-FROM ubuntu-base:latest
+FROM debian-base:latest
 
 # ARG from docker-compose
 ARG cookbooks_dir
@@ -22,18 +22,18 @@ COPY "${cookbooks_dir}" "${TMP_COOKBOOKS_DIR}"
 COPY "${image_builder_dir}/files" /
 
 # Install everything in one optimized layer for smaller image
-RUN "${TMP_COOKBOOKS_DIR}/installers/git/git-install.sh" && \
-    "${TMP_COOKBOOKS_DIR}/installers/openssh/server/openssh-install.sh" && \
-    "${TMP_COOKBOOKS_DIR}/installers/python/python3-install.sh" "${PYTHON_VERSION}" && \
-    "${TMP_COOKBOOKS_DIR}/installers/precommit/precommit-install.sh" && \
-    "${TMP_COOKBOOKS_DIR}/installers/yaml-lint/yaml-lint-install.sh" && \
-    "${TMP_COOKBOOKS_DIR}/installers/json-lint/json-lint-install.sh" && \
-    "${TMP_COOKBOOKS_DIR}/installers/ansible/ansible-install.sh" "${ANSIBLE_VERSION}" && \
-    "${TMP_COOKBOOKS_DIR}/installers/terraform/terraform-install.sh" "${TERRAFORM_VERSION}" && \
-    "${TMP_COOKBOOKS_DIR}/installers/open-tofu/open-tofu-install.sh" "${OPEN_TOFU_VERSION}" && \
-    "${TMP_COOKBOOKS_DIR}/installers/azure-cli/azure-cli-install.sh" && \
-    "${TMP_COOKBOOKS_DIR}/installers/helm/helm-install.sh" "${HELM_VERSION}" && \
-    "${TMP_COOKBOOKS_DIR}/setters/clean/build-cleanup.sh" && \
+RUN "${TMP_COOKBOOKS_DIR}/shared/installers/git/git-install.sh" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/openssh/server/openssh-install.sh" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/python/python3-install.sh" "${PYTHON_VERSION}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/precommit/precommit-install.sh" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/yaml-lint/yaml-lint-install.sh" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/json-lint/json-lint-install.sh" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/ansible/ansible-install.sh" "${ANSIBLE_VERSION}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/terraform/terraform-install.sh" "${TERRAFORM_VERSION}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/open-tofu/open-tofu-install.sh" "${OPEN_TOFU_VERSION}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/azure-cli/azure-cli-install.sh" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/helm/helm-install.sh" "${HELM_VERSION}" && \
+    "${TMP_COOKBOOKS_DIR}/shared/installers/system/cleanup/build-cleanup.sh" && \
     rm -rf "${TMP_COOKBOOKS_DIR}"
 
 # Health check for development tools

@@ -1,4 +1,4 @@
-FROM ubuntu-base:latest
+FROM debian-base:latest
 
 # ARG from docker-compose
 ARG cookbooks_dir
@@ -21,8 +21,6 @@ COPY "${image_builder_dir}/files" /
 RUN "${TMP_COOKBOOKS_DIR}/shared/installers/prometheus/cadvisor/cadvisor-install.sh" "${CADVISOR_VERSION}" && \
     "${TMP_COOKBOOKS_DIR}/shared/installers/system/cleanup/build-cleanup.sh" && \
     rm -rf "${TMP_COOKBOOKS_DIR}"
-
-USER ${TECH_USER_NAME}
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \

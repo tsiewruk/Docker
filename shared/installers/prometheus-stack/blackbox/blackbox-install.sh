@@ -7,7 +7,7 @@ set -e
 source_dir=$(dirname $(readlink -f "$0"))
 cp -R "${source_dir}/files/service" /
 
-BLACKBOX_VERSION="${1}"
+BLACKBOX_VERSION=${1}
 
 ####################################
 echo-info "Installing Blackbox version - ${BLACKBOX_VERSION}"
@@ -18,3 +18,7 @@ tar -xvzf /tmp/blackbox/blackbox_exporter-${BLACKBOX_VERSION}.linux-amd64.tar.gz
 mv /tmp/blackbox/blackbox_exporter-${BLACKBOX_VERSION}.linux-amd64/blackbox_exporter /usr/local/bin/
 
 rm -rf /tmp/blackbox
+
+####################################
+echo-success "Blackbox installation completed"
+####################################

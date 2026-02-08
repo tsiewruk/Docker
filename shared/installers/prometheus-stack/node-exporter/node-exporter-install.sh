@@ -7,7 +7,7 @@ set -e
 source_dir=$(dirname $(readlink -f "$0"))
 cp -R "${source_dir}/files/service" /
 
-NODE_EXPORTER_VERSION="${1}"
+NODE_EXPORTER_VERSION=${1}
 
 ####################################
 echo-info "Installing Node-Exporter version - ${NODE_EXPORTER_VERSION}"
@@ -18,3 +18,7 @@ tar -xvzf /tmp/node-exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.
 mv /tmp/node-exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter /usr/local/bin/
 
 rm -rf /tmp/node-exporter
+
+####################################
+echo-success "Node-Exporter installation completed"
+####################################

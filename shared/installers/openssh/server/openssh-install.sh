@@ -13,3 +13,7 @@ echo-info "Installing Openssh-server"
 
 apt-get -y update
 apt-get -y install --no-install-recommends openssh-server
+
+####################################
+echo-success "Openssh-server installation completed"
+####################################

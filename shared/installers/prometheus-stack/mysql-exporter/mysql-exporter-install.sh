@@ -7,7 +7,7 @@ cp -R "${SCRIPT_DIR}/files/service" /
 
 . "${TMP_COOKBOOKS_DIR}/helpers/view"
 
-MYSQL_EXPORTER_VERSION="${1}"
+MYSQL_EXPORTER_VERSION=${1}
 
 ####################################
 echo-info "Installing MySQL Exporter version - ${MYSQL_EXPORTER_VERSION}"
@@ -18,3 +18,7 @@ tar -xvzf /tmp/mysql-exporter/mysqld_exporter-${MYSQL_EXPORTER_VERSION}.linux-am
 mv /tmp/mysql-exporter/mysqld_exporter-${MYSQL_EXPORTER_VERSION}.linux-amd64/mysqld_exporter /usr/local/bin/
 
 rm -rf /tmp/mysql-exporter
+
+####################################
+echo-success "MySQL Exporter installation completed"
+####################################

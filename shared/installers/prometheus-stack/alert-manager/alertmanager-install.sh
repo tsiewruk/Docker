@@ -7,7 +7,7 @@ set -e
 source_dir=$(dirname $(readlink -f "$0"))
 cp -R "${source_dir}/files/service" /
 
-ALERTMANAGER_VERSION="${1}"
+ALERTMANAGER_VERSION=${1}
 
 ####################################
 echo-info "Installing Alert-manager version - ${ALERTMANAGER_VERSION}"
@@ -21,3 +21,7 @@ mv /tmp/alertmanager/alertmanager-${ALERTMANAGER_VERSION}.linux-amd64/{alertmana
 rm -rf /tmp/alertmanager
 
 sed -i "s|<ALERT_MANAGER_URL>|${ALERT_MANAGER_URL}|" /service/alert-manager/run 
+
+####################################
+echo-success "Alert-manager installation completed"
+####################################

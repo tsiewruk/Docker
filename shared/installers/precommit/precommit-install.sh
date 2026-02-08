@@ -9,3 +9,7 @@ echo-info "Installing Precommit version"
 ####################################
 
 pip install pre-commit
+
+####################################
+echo-success "Precommit installation completed"
+####################################

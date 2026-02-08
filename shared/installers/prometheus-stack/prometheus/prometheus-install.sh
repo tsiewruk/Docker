@@ -7,7 +7,7 @@ set -e
 source_dir=$(dirname $(readlink -f "$0"))
 cp -R "${source_dir}/files/service" /
 
-PROMETHEUS_VERSION="${1}"
+PROMETHEUS_VERSION=${1}
 
 ####################################
 echo-info "Installing Prometheus version - ${PROMETHEUS_VERSION}"
@@ -19,3 +19,7 @@ mkdir -p /etc/prometheus
 mv /tmp/prometheus/prometheus-${PROMETHEUS_VERSION}.linux-amd64/* /usr/local/bin/
 
 rm -rf /tmp/prometheus
+
+####################################
+echo-success "Prometheus installation completed"
+####################################

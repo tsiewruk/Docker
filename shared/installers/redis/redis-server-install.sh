@@ -13,3 +13,7 @@ echo-info "Installing Redis-server"
 
 apt-get -y update
 apt-get -y install --no-install-recommends redis-server
+
+####################################
+echo-success "Redis-server installation completed"
+####################################

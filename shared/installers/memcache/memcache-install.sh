@@ -13,3 +13,7 @@ echo-info "Installing Memcache"
 
 apt-get -y update
 apt-get -y install --no-install-recommends memcached
+
+####################################
+echo-success "Memcache installation completed"
+####################################

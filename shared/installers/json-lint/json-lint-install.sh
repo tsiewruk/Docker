@@ -10,3 +10,7 @@ echo-info "Installing JSON Lint"
 
 apt-get -y update
 apt-get -y install --no-install-recommends jsonlint
+
+####################################
+echo-success "JSON Lint installation completed"
+####################################

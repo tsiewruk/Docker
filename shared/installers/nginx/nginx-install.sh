@@ -13,3 +13,7 @@ echo-info "Installing NGINX"
 
 apt-get -y update
 apt-get -y install --no-install-recommends nginx
+
+####################################
+echo-success "NGINX installation completed"
+####################################

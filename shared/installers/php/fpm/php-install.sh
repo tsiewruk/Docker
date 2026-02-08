@@ -30,3 +30,7 @@ if [ ! -d "/var/log/php/" ]; then
 fi
 
 sed -i "s/<PHP_VERSION>/${PHP_VERSION}/g" "/service/php/run"
+
+####################################
+echo-success "PHP installation completed"
+####################################

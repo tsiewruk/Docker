@@ -19,6 +19,72 @@ volumes:
   prometheus_volume:
     external: true
 
+# ===== COMMON LOGGING CONFIGURATION =====
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# ===== COMMON RESOURCE PROFILES =====
+x-resources-tiny: &resources-tiny
+  limits:
+    memory: 128M
+    cpus: '0.25'
+  reservations:
+    memory: 64M
+    cpus: '0.1'
+
+x-resources-small: &resources-small
+  limits:
+    memory: 256M
+    cpus: '0.25'
+  reservations:
+    memory: 128M
+    cpus: '0.1'
+
+x-resources-medium: &resources-medium
+  limits:
+    memory: 512M
+    cpus: '0.5'
+  reservations:
+    memory: 256M
+    cpus: '0.25'
+
+x-resources-large: &resources-large
+  limits:
+    memory: 1G
+    cpus: '0.75'
+  reservations:
+    memory: 512M
+    cpus: '0.5'
+
+# ===== COMMON SECURITY SETTINGS =====
+x-security-default: &security-default
+  security_opt:
+    - no-new-privileges:true
+
+x-security-user: &security-user
+  <<: *security-default
+  user: "1000:1000"
+
+x-security-readonly: &security-readonly
+  <<: *security-user
+  read_only: true
+
+# ===== COMMON HEALTHCHECK SETTINGS =====
+x-healthcheck-fast: &healthcheck-fast
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+x-healthcheck-medium: &healthcheck-medium
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 60s
+
 # ===== SERVICES MANAGEMENT =====
 services:
   alert-manager:
@@ -26,100 +92,61 @@ services:
     container_name: alert-manager
     hostname: alert-manager
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.25'
-        reservations:
-          memory: 128M
-          cpus: '0.1'
-    # Security
+      resources: *resources-small
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     environment:
-    - ALERTMANAGER_URL=alert-manager.local
+      - ALERTMANAGER_URL=alert-manager.local
     volumes:
       - alertmanager_volume:/data
     networks:
-    - monitoring-vn
+      - monitoring-vn
     ports:
-    - "9093:9093"
-    # Health check
+      - "9093:9093"
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.alert-manager.rule=Host(`alert-manager.local`)"
-    - "traefik.http.routers.alert-manager.service=alert-manager"
-    - "traefik.http.routers.alert-manager.tls=true"
-    - "traefik.http.routers.alert-manager.priority=10"
-    - "traefik.http.services.alert-manager.loadbalancer.server.port=9093"
-    stdin_open: true
-    tty: true
+      - "traefik.enable=true"
+      - "traefik.http.routers.alert-manager.rule=Host(`alert-manager.local`)"
+      - "traefik.http.routers.alert-manager.service=alert-manager"
+      - "traefik.http.routers.alert-manager.tls=true"
+      - "traefik.http.routers.alert-manager.priority=10"
+      - "traefik.http.services.alert-manager.loadbalancer.server.port=9093"
+    logging: *default-logging
 
   blackbox:
     image: "blackbox:latest"
     container_name: blackbox
     hostname: blackbox
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: '0.25'
-        reservations:
-          memory: 64M
-          cpus: '0.1'
-    # Security
-    read_only: true
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
+      resources: *resources-tiny
+    <<: *security-readonly
     networks:
-    - monitoring-vn
+      - monitoring-vn
     ports:
-    - "9115:9115"
-    # Health check
+      - "9115:9115"
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9115/metrics"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.blackbox.rule=Host(`blackbox.local`)"
-    - "traefik.http.routers.blackbox.service=blackbox"
-    - "traefik.http.routers.blackbox.tls=true"
-    - "traefik.http.routers.blackbox.priority=10"
-    - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
-    stdin_open: true
-    tty: true
+      - "traefik.enable=true"
+      - "traefik.http.routers.blackbox.rule=Host(`blackbox.local`)"
+      - "traefik.http.routers.blackbox.service=blackbox"
+      - "traefik.http.routers.blackbox.tls=true"
+      - "traefik.http.routers.blackbox.priority=10"
+      - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
+    logging: *default-logging
 
   cadvisor:
     image: "cadvisor:latest"
     container_name: cadvisor
     hostname: cadvisor
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.25'
-        reservations:
-          memory: 128M
-          cpus: '0.1'
-    # Security 
+      resources: *resources-small
     user: "1000:1000"
     cap_add:
       - SYS_ADMIN
@@ -127,216 +154,151 @@ services:
     security_opt:
       - apparmor:unconfined
     networks:
-    - monitoring-vn
+      - monitoring-vn
     ports:
-    - "8082:8080"
+      - "8082:8080"
     volumes:
-    - "/var/run:/var/run:ro"
-    - "/sys:/sys:ro"
-    - "/var/lib/docker/:/var/lib/docker:ro"
-    - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    - "/etc/machine-id:/etc/machine-id:ro"
-    - "/var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro"
-    - "/dev/disk/:/dev/disk:ro"
-    - "/:/rootfs:ro"
+      - "/var/run:/var/run:ro"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/etc/machine-id:/etc/machine-id:ro"
+      - "/var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro"
+      - "/dev/disk/:/dev/disk:ro"
+      - "/:/rootfs:ro"
     devices:
-    - "/dev/kmsg:/dev/kmsg:r" 
-    # Health check
+      - "/dev/kmsg:/dev/kmsg:r"
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.local`)"
-    - "traefik.http.routers.cadvisor.service=cadvisor"
-    - "traefik.http.routers.cadvisor.tls=true"
-    - "traefik.http.routers.cadvisor.priority=10"
-    - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
-    stdin_open: true
-    tty: true
+      - "traefik.enable=true"
+      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.local`)"
+      - "traefik.http.routers.cadvisor.service=cadvisor"
+      - "traefik.http.routers.cadvisor.tls=true"
+      - "traefik.http.routers.cadvisor.priority=10"
+      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
+    logging: *default-logging
 
   node-exporter:
     image: "node-exporter:latest"
     container_name: node-exporter
     hostname: node-exporter
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: '0.25'
-        reservations:
-          memory: 64M
-          cpus: '0.1'
-    # Security
-    read_only: true
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
+      resources: *resources-tiny
+    <<: *security-readonly
     networks:
-    - monitoring-vn
+      - monitoring-vn
     ports:
-    - "9100:9100"
+      - "9100:9100"
     volumes:
-    - '/:/host:ro,rslave'
+      - '/:/host:ro,rslave'
     pid: host
-    # Health check
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9100/metrics"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.local`)"
-    - "traefik.http.routers.node-exporter.service=node-exporter"
-    - "traefik.http.routers.node-exporter.tls=true"
-    - "traefik.http.routers.node-exporter.priority=10"
-    - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
-    stdin_open: true
-    tty: true
+      - "traefik.enable=true"
+      - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.local`)"
+      - "traefik.http.routers.node-exporter.service=node-exporter"
+      - "traefik.http.routers.node-exporter.tls=true"
+      - "traefik.http.routers.node-exporter.priority=10"
+      - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
+    logging: *default-logging
 
   mysql-exporter:
     image: "mysql-exporter:latest"
     container_name: mysql-exporter
     hostname: mysql-exporter
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: '0.25'
-        reservations:
-          memory: 64M
-          cpus: '0.1'
-    # Security
-    read_only: true
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
+      resources: *resources-tiny
+    <<: *security-readonly
     networks:
-    - monitoring-vn
+      - monitoring-vn
     ports:
-    - "9104:9104"
-    # Health check
+      - "9104:9104"
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9104/metrics"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.mysql-exporter.rule=Host(`mysql-exporter.local`)"
-    - "traefik.http.routers.mysql-exporter.service=mysql-exporter"
-    - "traefik.http.routers.mysql-exporter.tls=true"
-    - "traefik.http.routers.mysql-exporter.priority=10"
-    - "traefik.http.services.mysql-exporter.loadbalancer.server.port=9104"
-    stdin_open: true
-    tty: true
+      - "traefik.enable=true"
+      - "traefik.http.routers.mysql-exporter.rule=Host(`mysql-exporter.local`)"
+      - "traefik.http.routers.mysql-exporter.service=mysql-exporter"
+      - "traefik.http.routers.mysql-exporter.tls=true"
+      - "traefik.http.routers.mysql-exporter.priority=10"
+      - "traefik.http.services.mysql-exporter.loadbalancer.server.port=9104"
+    logging: *default-logging
 
   prometheus:
     image: "prometheus:latest"
     container_name: prometheus
     hostname: prometheus
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     environment:
-    - PROMETHEUS_URL=prometheus.local
+      - PROMETHEUS_URL=prometheus.local
     volumes:
-    - prometheus_volume:/etc/prometheus/
+      - prometheus_volume:/etc/prometheus/
+    tmpfs:
+      - /tmp:size=100M,mode=1777
     networks:
-    - monitoring-vn
+      - monitoring-vn
     ports:
-    - "9090:9090"
-    # Health check
+      - "9090:9090"
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)"
-    - "traefik.http.routers.prometheus.service=prometheus"
-    - "traefik.http.routers.prometheus.tls=true"
-    - "traefik.http.routers.prometheus.priority=10"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
-    stdin_open: true
-    tty: true
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)"
+      - "traefik.http.routers.prometheus.service=prometheus"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.priority=10"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    logging: *default-logging
 
   grafana:
     image: "grafana:latest"
     container_name: grafana
     hostname: grafana
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    # Security
-    user: "1000:1000"
+      resources: *resources-medium
+    <<: *security-user
     secrets:
       - grafana_admin_password
       - grafana_smtp_password
-    security_opt:
-      - no-new-privileges:true
     environment:
-    - grafana_organization_name=MY_ORGANIZATION
-    - grafana_organization_theme=dark
-    - grafana_organization_weekstart=monday
-    - grafana_organization_timezone=Europe/Warsaw
-    - grafana_admin_name=Admin
-    - grafana_admin_login=admin
-    - grafana_admin_old_password=admin
-    - grafana_admin_email=admin@example.com
-    - smtp_user=monitoring
-    - smtp_email=monitoring@example.com
-    - instance_name=Grafana Monitoring
+      - grafana_organization_name=MY_ORGANIZATION
+      - grafana_organization_theme=dark
+      - grafana_organization_weekstart=monday
+      - grafana_organization_timezone=Europe/Warsaw
+      - grafana_admin_name=Admin
+      - grafana_admin_login=admin
+      - grafana_admin_old_password=admin
+      - grafana_admin_email=admin@example.com
+      - smtp_user=monitoring
+      - smtp_email=monitoring@example.com
+      - instance_name=Grafana Monitoring
     networks:
-    - monitoring-vn
+      - monitoring-vn
     volumes:
-    - grafana_volume:/var/lib/grafana
+      - grafana_volume:/var/lib/grafana
     ports:
-    - "3000:3000"
-    # Health check
+      - "3000:3000"
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.grafana.rule=Host(`grafana.local`)"
-    - "traefik.http.routers.grafana.service=grafana"
-    - "traefik.http.routers.grafana.tls=true"
-    - "traefik.http.routers.grafana.priority=10"
-    - "traefik.http.services.grafana.loadbalancer.server.port=3000"
-    stdin_open: true
-    tty: true
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.local`)"
+      - "traefik.http.routers.grafana.service=grafana"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.priority=10"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    logging: *default-logging

@@ -1,16 +1,81 @@
 #!/bin/bash
+#
+# Start s6 service
+# Usage: /etc/start <service_name>
+#
 
-set -e
+set -euo pipefail
 
-source_dir="$(dirname "$0")"
-source ${source_dir}/../../source/font.sh
-
-SERVICE="${1}"
-
-s6-svc -u "/service/${SERVICE}"
-if s6-svstat "/service/${SERVICE}" | grep -q '^up'; then
-  echo-success "Service ${SERVICE} up"
-  echo-info "Service ${SERVICE} is up, PID>" `ps auxf | grep ${SERVICE} | awk '{print $2}' | head -n1`
+# Try to load framework logging, fallback to basic echo
+if [[ -f /usr/local/lib/entrypoint-common.sh ]]; then
+    # shellcheck disable=SC1091
+    source /usr/local/lib/entrypoint-common.sh
+    ENTRYPOINT_SERVICE_NAME="s6-manager"
+    _init_logging 2>/dev/null || true
 else
-  echo-error "Service ${SERVICE} is not up!"
+    # Fallback logging functions
+    log_info() { echo "[INFO] $*"; }
+    log_success() { echo "[SUCCESS] $*"; }
+    log_error() { echo "[ERROR] $*" >&2; }
+    log_warning() { echo "[WARNING] $*" >&2; }
+fi
+
+# Validate arguments
+if [[ -z "${1:-}" ]]; then
+    log_error "Missing service name"
+    log_info "Usage: $0 <service_name>"
+    exit 1
+fi
+
+SERVICE="$1"
+
+# Validate service name (alphanumeric, dash, underscore only)
+if [[ ! "${SERVICE}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    log_error "Invalid service name: ${SERVICE}"
+    log_info "Service name must contain only letters, numbers, dash, and underscore"
+    exit 1
+fi
+
+SERVICE_PATH="/service/${SERVICE}"
+
+# Check if service directory exists
+if [[ ! -d "${SERVICE_PATH}" ]]; then
+    log_error "Service not found: ${SERVICE}"
+    log_info "Service directory does not exist: ${SERVICE_PATH}"
+    exit 1
+fi
+
+# Check if already running
+if s6-svstat "${SERVICE_PATH}" 2>/dev/null | grep -q '^up'; then
+    log_warning "Service ${SERVICE} is already running"
+    exit 0
+fi
+
+# Start service
+log_info "Starting service: ${SERVICE}"
+if s6-svc -u "${SERVICE_PATH}"; then
+    # Wait a moment for service to start
+    sleep 1
+
+    # Verify service is up
+    if s6-svstat "${SERVICE_PATH}" 2>/dev/null | grep -q '^up'; then
+        log_success "Service ${SERVICE} started successfully"
+
+        # Try to get PID (best effort, non-critical)
+        if command -v s6-svstat &>/dev/null; then
+            # Extract PID from s6-svstat if available
+            local pid
+            pid=$(s6-svstat "${SERVICE_PATH}" 2>/dev/null | grep -oP 'pid \K[0-9]+' || echo "unknown")
+            if [[ "${pid}" != "unknown" ]]; then
+                log_info "Service ${SERVICE} PID: ${pid}"
+            fi
+        fi
+        exit 0
+    else
+        log_error "Service ${SERVICE} failed to start"
+        exit 1
+    fi
+else
+    log_error "Failed to send start signal to service: ${SERVICE}"
+    exit 1
 fi

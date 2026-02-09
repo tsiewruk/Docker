@@ -1,39 +1,49 @@
 #!/bin/bash
+#
+# Wazuh Dashboard Service Entrypoint
+# Uses the common entrypoint framework
+#
 
-set -euo pipefail
-
-# Configuration
-LOG_FILE="/var/log/wazuh-dashboard-entrypoint.log"
-
-# Logging function
-log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "${LOG_FILE}"
+# Load common entrypoint library
+# shellcheck disable=SC1091
+source /usr/local/lib/entrypoint-common.sh || {
+    echo "ERROR: Failed to load entrypoint-common.sh" >&2
+    exit 1
 }
 
-# Error handling
-trap 'log "ERROR: Wazuh Dashboard entrypoint failed at line $LINENO"' ERR
+# ============================================================================
+# SERVICE CONFIGURATION
+# ============================================================================
 
-log "Starting Wazuh Dashboard entrypoint..."
+# Service identification
+readonly SERVICE_NAME="wazuh-dashboard"
 
-# Check if wazuh-dashboard is installed
-if [ ! -d "/usr/share/wazuh-dashboard" ]; then
-    log "ERROR: Wazuh Dashboard not found in /usr/share/wazuh-dashboard"
-    exit 1
-fi
+# Override log file location for Wazuh Dashboard
+export ENTRYPOINT_LOG_FILE="/var/log/wazuh-dashboard-entrypoint.log"
 
-# Check configuration directory
-if [ ! -d "/etc/wazuh-dashboard" ]; then
-    log "WARNING: Configuration directory /etc/wazuh-dashboard not found"
-    mkdir -p /etc/wazuh-dashboard
-fi
+# No default configuration scripts
+readonly DEFAULT_SCRIPTS=()
 
-# Create log directory
-mkdir -p /var/log/wazuh-dashboard
-chown -R techuser:techuser /var/log/wazuh-dashboard
+# ============================================================================
+# MAIN ENTRYPOINT
+# ============================================================================
 
-# Set proper permissions
-chown -R techuser:techuser /usr/share/wazuh-dashboard
-chown -R techuser:techuser /etc/wazuh-dashboard
+main() {
+    # Initialize entrypoint framework
+    entrypoint_init "${SERVICE_NAME}" "${DEFAULT_SCRIPTS[@]}" || {
+        log_error "Failed to initialize entrypoint framework"
+        exit 1
+    }
 
-log "Starting s6 supervision for Wazuh Dashboard..."
-exec s6-svscan -t0 /service
+    # Run main entrypoint flow (hooks will handle setup)
+    entrypoint_run || {
+        log_error "Entrypoint execution failed"
+        exit 1
+    }
+
+    # Start service supervisor
+    entrypoint_start_supervisor s6-svscan -t0 /service
+}
+
+# Execute main function
+main "$@"

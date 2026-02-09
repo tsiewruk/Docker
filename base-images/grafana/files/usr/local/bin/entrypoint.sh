@@ -1,58 +1,73 @@
 #!/bin/bash
+#
+# Grafana Service Entrypoint
+# Uses the common entrypoint framework
+#
 
-set -euo pipefail
-
-# Configuration
-ENV_FILE="/usr/local/bin/entrypoint-scripts.env"
-SCRIPTS_PATH="/usr/local/bin/entrypoint-scripts/"
-LOG_FILE="/var/log/entrypoint.log"
-
-# Logging function
-log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "${LOG_FILE}"
+# Load common entrypoint library
+# shellcheck disable=SC1091
+source /usr/local/lib/entrypoint-common.sh || {
+    echo "ERROR: Failed to load entrypoint-common.sh" >&2
+    exit 1
 }
 
-# Error handling
-trap 'log "ERROR: Entrypoint failed at line $LINENO"' ERR
+# ============================================================================
+# SERVICE CONFIGURATION
+# ============================================================================
 
-log "Starting Grafana entrypoint..."
+# Service identification
+readonly SERVICE_NAME="grafana"
 
-# Initialize environment file
-if [ ! -f "${ENV_FILE}" ]; then
-    log "Creating environment file: ${ENV_FILE}"
-    touch "${ENV_FILE}"
-    echo "export a_configure_grafana=1" >> "${ENV_FILE}"
-fi
+# Default configuration scripts to run
+# These are executed in the order they appear if their env var is set to 1
+readonly DEFAULT_SCRIPTS=(
+    "a_configure_grafana"
+)
 
-# Source environment safely
-if [ -r "${ENV_FILE}" ]; then
-    source "${ENV_FILE}"
-else
-    log "WARNING: Cannot read environment file: ${ENV_FILE}"
-fi
+# ============================================================================
+# SERVICE-SPECIFIC FUNCTIONS (optional)
+# ============================================================================
 
-# Execute configuration scripts
-log "Processing configuration scripts..."
-env_array=( $(env | sort) )
-for var in "${env_array[@]}"; do
-    if [[ "${var}" =~ ^[a-zA-Z_][a-zA-Z0-9_]*=1$ ]]; then
-        env_name=$(echo "${var}" | cut -d'=' -f1)
-        script_file="${SCRIPTS_PATH}${env_name}.sh"
-        
-        if [ -x "${script_file}" ]; then
-            log "Executing configuration script: ${script_file}"
-            "${script_file}" || {
-                log "ERROR: Configuration script failed: ${script_file}"
-                exit 1
-            }
-        fi
+# Add any Grafana-specific functions here if needed
+# These can be called from hooks or can be used to extend functionality
+
+grafana_check_config() {
+    log_debug "Checking Grafana configuration..."
+
+    if [[ ! -d "/etc/grafana" ]]; then
+        log_warning "Grafana config directory not found, creating: /etc/grafana"
+        mkdir -p /etc/grafana
     fi
-done
 
-# Re-source environment after scripts
-if [ -r "${ENV_FILE}" ]; then
-    source "${ENV_FILE}"
-fi
+    return 0
+}
 
-log "Starting s6 supervision..."
-exec s6-svscan -t0 /service
+# ============================================================================
+# MAIN ENTRYPOINT
+# ============================================================================
+
+main() {
+    # Initialize entrypoint framework
+    entrypoint_init "${SERVICE_NAME}" "${DEFAULT_SCRIPTS[@]}" || {
+        log_error "Failed to initialize entrypoint framework"
+        exit 1
+    }
+
+    # Run service-specific checks
+    grafana_check_config || {
+        log_error "Grafana configuration check failed"
+        exit 1
+    }
+
+    # Run main entrypoint flow (hooks + config scripts)
+    entrypoint_run || {
+        log_error "Entrypoint execution failed"
+        exit 1
+    }
+
+    # Start service supervisor
+    entrypoint_start_supervisor s6-svscan -t0 /service
+}
+
+# Execute main function
+main "$@"

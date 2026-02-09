@@ -34,6 +34,10 @@ RUN apt-get update -y && \
     mkdir -p /etc/profile.d && \
     echo '. /usr/local/lib/logger-functions.sh' > /etc/profile.d/logger.sh && \
     chmod 644 /etc/profile.d/logger.sh && \
+    # Install entrypoint framework library
+    chmod 644 /usr/local/lib/entrypoint-common.sh && \
+    # Set executable permissions for service management scripts
+    chmod +x /etc/start /etc/stop /etc/status /etc/restart && \
     # Clean up everything in one layer
     rm -rf "${TMP_COOKBOOKS_DIR}"
 

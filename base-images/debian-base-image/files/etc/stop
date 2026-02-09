@@ -1,16 +1,71 @@
 #!/bin/bash
+#
+# Stop s6 service
+# Usage: /etc/stop <service_name>
+#
 
-set -e
+set -euo pipefail
 
-source_dir="$(dirname "$0")"
-source ${source_dir}/../../source/font.sh
-
-SERVICE="${1}"
-
-s6-svc -d "/service/${SERVICE}"
-if s6-svstat "/service/${SERVICE}" | grep -q '^down'; then
-  echo-success "Service ${SERVICE} - stopped"
+# Try to load framework logging, fallback to basic echo
+if [[ -f /usr/local/lib/entrypoint-common.sh ]]; then
+    # shellcheck disable=SC1091
+    source /usr/local/lib/entrypoint-common.sh
+    ENTRYPOINT_SERVICE_NAME="s6-manager"
+    _init_logging 2>/dev/null || true
 else
-  echo-error "Service ${SERVICE} is not stopped!"
-  echo-info "Service ${SERVICE} is up, PID>" `ps auxf | grep ${SERVICE} | awk '{print $2}' | head -n1`
+    # Fallback logging functions
+    log_info() { echo "[INFO] $*"; }
+    log_success() { echo "[SUCCESS] $*"; }
+    log_error() { echo "[ERROR] $*" >&2; }
+    log_warning() { echo "[WARNING] $*" >&2; }
+fi
+
+# Validate arguments
+if [[ -z "${1:-}" ]]; then
+    log_error "Missing service name"
+    log_info "Usage: $0 <service_name>"
+    exit 1
+fi
+
+SERVICE="$1"
+
+# Validate service name (alphanumeric, dash, underscore only)
+if [[ ! "${SERVICE}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    log_error "Invalid service name: ${SERVICE}"
+    log_info "Service name must contain only letters, numbers, dash, and underscore"
+    exit 1
+fi
+
+SERVICE_PATH="/service/${SERVICE}"
+
+# Check if service directory exists
+if [[ ! -d "${SERVICE_PATH}" ]]; then
+    log_error "Service not found: ${SERVICE}"
+    log_info "Service directory does not exist: ${SERVICE_PATH}"
+    exit 1
+fi
+
+# Check if already stopped
+if s6-svstat "${SERVICE_PATH}" 2>/dev/null | grep -q '^down'; then
+    log_warning "Service ${SERVICE} is already stopped"
+    exit 0
+fi
+
+# Stop service
+log_info "Stopping service: ${SERVICE}"
+if s6-svc -d "${SERVICE_PATH}"; then
+    # Wait a moment for service to stop
+    sleep 1
+
+    # Verify service is down
+    if s6-svstat "${SERVICE_PATH}" 2>/dev/null | grep -q '^down'; then
+        log_success "Service ${SERVICE} stopped successfully"
+        exit 0
+    else
+        log_warning "Service ${SERVICE} did not stop gracefully, still running"
+        exit 1
+    fi
+else
+    log_error "Failed to send stop signal to service: ${SERVICE}"
+    exit 1
 fi

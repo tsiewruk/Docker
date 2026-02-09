@@ -20,110 +20,135 @@ volumes:
   mysql_volume:
     external: true
 
+# ===== COMMON LOGGING CONFIGURATION =====
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# ===== COMMON RESOURCE PROFILES =====
+x-resources-small: &resources-small
+  limits:
+    memory: 256M
+    cpus: '0.25'
+  reservations:
+    memory: 128M
+    cpus: '0.1'
+
+x-resources-medium: &resources-medium
+  limits:
+    memory: 512M
+    cpus: '0.5'
+  reservations:
+    memory: 256M
+    cpus: '0.25'
+
+x-resources-large: &resources-large
+  limits:
+    memory: 1G
+    cpus: '0.75'
+  reservations:
+    memory: 512M
+    cpus: '0.5'
+
+# ===== COMMON SECURITY SETTINGS =====
+x-security-default: &security-default
+  security_opt:
+    - no-new-privileges:true
+
+x-security-user: &security-user
+  <<: *security-default
+  user: "1000:1000"
+
+# ===== COMMON BUILD CONFIGURATION =====
+x-common-build: &common-build
+  args:
+    cookbooks_dir: ../../shared
+
+# ===== COMMON HEALTHCHECK SETTINGS =====
+x-healthcheck-medium: &healthcheck-medium
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 60s
+
+x-healthcheck-slow: &healthcheck-slow
+  interval: 30s
+  timeout: 10s
+  retries: 5
+  start_period: 60s
+
 # ===== SERVICES MANAGEMENT =====
 services:
-  ubuntu-base:
+  debian-base:
     build:
-      context: .
+      <<: *common-build
+      context: ./base-images/debian-base-image
       args:
-        cookbooks_dir: ./cookbooks
-        image_builder_dir: ./builders/ubuntu-base
-      dockerfile: builders/ubuntu-base/Dockerfile
-    image: "ubuntu-base:latest"
-    # Resource limits
+        image_builder_dir: .
+      dockerfile: Dockerfile
+    image: "debian-base:latest"
     deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.25'
-        reservations:
-          memory: 128M
-          cpus: '0.1'
-    # Security
+      resources: *resources-small
+    <<: *security-default
     read_only: false
-    security_opt:
-      - no-new-privileges:true
+    logging: *default-logging
     stdin_open: true
     tty: true
 
   traefik:
     build:
-      context: .
+      <<: *common-build
+      context: ./base-images/traefik
       args:
-        cookbooks_dir: ./cookbooks
-        image_builder_dir: ./builders/traefik
+        image_builder_dir: .
         TRAEFIK_VERSION: '2.10.4'
-      dockerfile: builders/traefik/Dockerfile
+      dockerfile: Dockerfile
     image: "traefik:latest"
     container_name: traefik
     hostname: traefik
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    # Security
+      resources: *resources-medium
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     environment:
-    - TRAEFIK_CONFIG=local
-    - CERT_CONFIG=local
+      - TRAEFIK_CONFIG=local
+      - CERT_CONFIG=local
     ports:
-    - "80:80"
-    - "443:443"
+      - "80:80"
+      - "443:443"
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro 
-    # Health check
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
       start_period: 40s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.traefik.rule=Host(`traefik.local`)"
-    - "traefik.http.routers.traefik.service=api@internal"
-    - "traefik.http.routers.traefik.tls=true"
-    - "traefik.http.routers.traefik.priority=1"
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.local`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.priority=1"
     networks:
-      - default-vn
       - web
+    logging: *default-logging
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
   wordpress:
     image: "wordpress:latest"
     container_name: wordpress
     hostname: wordpress
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    # Security 
+      resources: *resources-medium
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     networks:
-    - default-vn
-    - web
+      - web
     ports:
-    - "8085:80"
-    - "8445:443" 
+      - "8085:80"
+      - "8445:443"
     environment:
       WORDPRESS_DB_HOST: mysql:3306
       WORDPRESS_DB_USER: wordpress
@@ -133,50 +158,36 @@ services:
       - wordpress_db_password
     volumes:
       - wordpress_volume:/var/www/html
-    # Health check
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "curl", "-f", "http://localhost:80/wp-admin/install.php"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.wordpress.rule=Host(`wordpress.local`)"
-    - "traefik.http.routers.wordpress.service=wordpress"
-    - "traefik.http.routers.wordpress.tls=true"
-    - "traefik.http.routers.wordpress.priority=10"
-    - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.rule=Host(`wordpress.local`)"
+      - "traefik.http.routers.wordpress.service=wordpress"
+      - "traefik.http.routers.wordpress.tls=true"
+      - "traefik.http.routers.wordpress.priority=10"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
     depends_on:
-      - mysql
-      - traefik
-    stdin_open: true
-    tty: true
+      mysql:
+        condition: service_healthy
+      traefik:
+        condition: service_healthy
+    logging: *default-logging
 
   mysql:
     image: "mysql:8.0"
     container_name: mysql
     hostname: mysql
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     networks:
-    - default-vn
-    - web
+      - web
     ports:
-    - "3306:3306"
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
       MYSQL_DATABASE: wordpress
@@ -187,14 +198,9 @@ services:
       - wordpress_db_password
     volumes:
       - mysql_volume:/var/lib/mysql
-    # Health check
+    tmpfs:
+      - /tmp:size=100M,mode=1777
     healthcheck:
+      <<: *healthcheck-slow
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$(cat /run/secrets/mysql_root_password)"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    depends_on:
-    - traefik
-    stdin_open: true
-    tty: true
+    logging: *default-logging

@@ -1,0 +1,107 @@
+# ===== COMMON CONFIGURATION FOR ALL DOCKER COMPOSE FILES =====
+# This file contains shared extension fields that can be reused across all compose files
+# Usage: Include this file in other compose files with:
+#   include:
+#     - compose-common.yml
+
+# ===== COMMON LOGGING CONFIGURATION =====
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# ===== COMMON RESOURCE PROFILES =====
+x-resources-tiny: &resources-tiny
+  limits:
+    memory: 128M
+    cpus: '0.25'
+  reservations:
+    memory: 64M
+    cpus: '0.1'
+
+x-resources-small: &resources-small
+  limits:
+    memory: 256M
+    cpus: '0.25'
+  reservations:
+    memory: 128M
+    cpus: '0.1'
+
+x-resources-medium: &resources-medium
+  limits:
+    memory: 512M
+    cpus: '0.5'
+  reservations:
+    memory: 256M
+    cpus: '0.25'
+
+x-resources-large: &resources-large
+  limits:
+    memory: 1G
+    cpus: '0.75'
+  reservations:
+    memory: 512M
+    cpus: '0.5'
+
+x-resources-xlarge: &resources-xlarge
+  limits:
+    memory: 2G
+    cpus: '1.0'
+  reservations:
+    memory: 1G
+    cpus: '0.5'
+
+x-resources-xxlarge: &resources-xxlarge
+  limits:
+    memory: 3G
+    cpus: '2.0'
+  reservations:
+    memory: 1.5G
+    cpus: '1.0'
+
+# ===== COMMON SECURITY SETTINGS =====
+x-security-default: &security-default
+  security_opt:
+    - no-new-privileges:true
+
+x-security-user: &security-user
+  <<: *security-default
+  user: "1000:1000"
+
+x-security-readonly: &security-readonly
+  <<: *security-user
+  read_only: true
+
+# ===== COMMON HEALTHCHECK SETTINGS =====
+x-healthcheck-fast: &healthcheck-fast
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+x-healthcheck-medium: &healthcheck-medium
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 60s
+
+x-healthcheck-slow: &healthcheck-slow
+  interval: 60s
+  timeout: 15s
+  retries: 5
+  start_period: 120s
+
+# ===== COMMON RESTART POLICY =====
+x-restart-policy: &restart-unless-stopped
+  restart: unless-stopped
+
+# ===== COMMON TMPFS =====
+x-tmpfs-small: &tmpfs-small
+  - /tmp:size=50M,mode=1777
+
+x-tmpfs-medium: &tmpfs-medium
+  - /tmp:size=100M,mode=1777
+
+x-tmpfs-large: &tmpfs-large
+  - /tmp:size=256M,mode=1777

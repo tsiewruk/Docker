@@ -1,45 +1,49 @@
 #!/bin/bash
+#
+# Wazuh Indexer Service Entrypoint
+# Uses the common entrypoint framework
+#
 
-set -euo pipefail
-
-# Configuration
-LOG_FILE="/var/log/wazuh-indexer-entrypoint.log"
-
-# Logging function
-log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "${LOG_FILE}"
+# Load common entrypoint library
+# shellcheck disable=SC1091
+source /usr/local/lib/entrypoint-common.sh || {
+    echo "ERROR: Failed to load entrypoint-common.sh" >&2
+    exit 1
 }
 
-# Error handling
-trap 'log "ERROR: Wazuh Indexer entrypoint failed at line $LINENO"' ERR
+# ============================================================================
+# SERVICE CONFIGURATION
+# ============================================================================
 
-log "Starting Wazuh Indexer entrypoint..."
+# Service identification
+readonly SERVICE_NAME="wazuh-indexer"
 
-# Check if wazuh-indexer is installed
-if [ ! -d "/usr/share/wazuh-indexer" ]; then
-    log "ERROR: Wazuh Indexer not found in /usr/share/wazuh-indexer"
-    exit 1
-fi
+# Override log file location for Wazuh Indexer
+export ENTRYPOINT_LOG_FILE="/var/log/wazuh-indexer-entrypoint.log"
 
-# Check configuration directory
-if [ ! -d "/etc/wazuh-indexer" ]; then
-    log "WARNING: Configuration directory /etc/wazuh-indexer not found"
-    mkdir -p /etc/wazuh-indexer
-fi
+# No default configuration scripts
+readonly DEFAULT_SCRIPTS=()
 
-# Create log directory
-mkdir -p /var/log/wazuh-indexer
-chown -R techuser:techuser /var/log/wazuh-indexer
+# ============================================================================
+# MAIN ENTRYPOINT
+# ============================================================================
 
-# Set proper permissions for OpenSearch
-chown -R techuser:techuser /usr/share/wazuh-indexer
-chown -R techuser:techuser /etc/wazuh-indexer
+main() {
+    # Initialize entrypoint framework
+    entrypoint_init "${SERVICE_NAME}" "${DEFAULT_SCRIPTS[@]}" || {
+        log_error "Failed to initialize entrypoint framework"
+        exit 1
+    }
 
-# Create data directory if it doesn't exist
-if [ ! -d "/var/lib/wazuh-indexer" ]; then
-    mkdir -p /var/lib/wazuh-indexer
-    chown -R techuser:techuser /var/lib/wazuh-indexer
-fi
+    # Run main entrypoint flow (hooks will handle setup)
+    entrypoint_run || {
+        log_error "Entrypoint execution failed"
+        exit 1
+    }
 
-log "Starting s6 supervision for Wazuh Indexer..."
-exec s6-svscan -t0 /service
+    # Start service supervisor
+    entrypoint_start_supervisor s6-svscan -t0 /service
+}
+
+# Execute main function
+main "$@"

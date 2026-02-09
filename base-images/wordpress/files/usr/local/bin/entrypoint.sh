@@ -1,23 +1,48 @@
 #!/bin/bash
+#
+# Service Entrypoint
+# Uses the common entrypoint framework
+#
 
-set -e
+# Load common entrypoint library
+# shellcheck disable=SC1091
+source /usr/local/lib/entrypoint-common.sh || {
+    echo "ERROR: Failed to load entrypoint-common.sh" >&2
+    exit 1
+}
 
-ENV_FILE="/usr/local/bin/entrypoint-scripts.env"
-SCRIPTS_PATH="/usr/local/bin/entrypoint-scripts/"
+# ============================================================================
+# SERVICE CONFIGURATION
+# ============================================================================
 
-if [ ! -f "${ENV_FILE}" ]; then
-    touch "${ENV_FILE}"
-    echo "export a_configure_app=1" >> "${ENV_FILE}"
-fi
-source "$ENV_FILE"
+# Service identification
+readonly SERVICE_NAME="wordpress"
 
-env_array=( $(env | sort) )
-for var in "${env_array[@]}"; do
-    if [ "${var: -1}" = "1" ]; then
-        env_name=$(echo ${var:0:-2})
-        [ -x "${SCRIPTS_PATH}${env_name}.sh" ] && "${SCRIPTS_PATH}${env_name}.sh"
-    fi
-done
-source "${ENV_FILE}"
+# Default configuration scripts to run
+readonly DEFAULT_SCRIPTS=(
+    "a_configure_app"
+)
 
-exec s6-svscan -t0 /service
+# ============================================================================
+# MAIN ENTRYPOINT
+# ============================================================================
+
+main() {
+    # Initialize entrypoint framework
+    entrypoint_init "\${SERVICE_NAME}" "\${DEFAULT_SCRIPTS[@]}" || {
+        log_error "Failed to initialize entrypoint framework"
+        exit 1
+    }
+
+    # Run main entrypoint flow (hooks + config scripts)
+    entrypoint_run || {
+        log_error "Entrypoint execution failed"
+        exit 1
+    }
+
+    # Start service supervisor
+    entrypoint_start_supervisor s6-svscan -t0 /service
+}
+
+# Execute main function
+main "\$@"

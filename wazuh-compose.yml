@@ -13,6 +13,49 @@ volumes:
   wazuh_server_data:
     driver: local
 
+# ===== COMMON LOGGING CONFIGURATION =====
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# ===== COMMON RESOURCE PROFILES =====
+x-resources-large: &resources-large
+  limits:
+    memory: 1G
+    cpus: '0.75'
+  reservations:
+    memory: 512M
+    cpus: '0.5'
+
+x-resources-xlarge: &resources-xlarge
+  limits:
+    memory: 2G
+    cpus: '1.0'
+  reservations:
+    memory: 1G
+    cpus: '0.5'
+
+# ===== COMMON SECURITY SETTINGS =====
+x-security-user: &security-user
+  user: "1000:1000"
+  security_opt:
+    - no-new-privileges:true
+
+# ===== COMMON HEALTHCHECK SETTINGS =====
+x-healthcheck-medium: &healthcheck-medium
+  interval: 30s
+  timeout: 10s
+  retries: 5
+  start_period: 60s
+
+x-healthcheck-slow: &healthcheck-slow
+  interval: 60s
+  timeout: 15s
+  retries: 5
+  start_period: 120s
+
 # ===== SERVICES MANAGEMENT =====
 services:
   wazuh-dashboard:
@@ -20,64 +63,40 @@ services:
     container_name: wazuh-dashboard
     hostname: wazuh-dashboard
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     ports:
-    - "5601:5601"
-    # Health check
+      - "5601:5601"
     healthcheck:
+      <<: *healthcheck-slow
       test: ["CMD", "curl", "-f", "http://localhost:5601/status"]
-      interval: 60s
-      timeout: 15s
-      retries: 5
-      start_period: 120s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.wazuh-dashboard.rule=Host(`wazuh-dashboard.local`)"
-    - "traefik.http.routers.wazuh-dashboard.service=wazuh-dashboard"
-    - "traefik.http.routers.wazuh-dashboard.tls=true"
-    - "traefik.http.routers.wazuh-dashboard.priority=10"
-    - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-dashboard.rule=Host(`wazuh-dashboard.local`)"
+      - "traefik.http.routers.wazuh-dashboard.service=wazuh-dashboard"
+      - "traefik.http.routers.wazuh-dashboard.tls=true"
+      - "traefik.http.routers.wazuh-dashboard.priority=10"
+      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
     networks:
-      - default
       - wazuh
     depends_on:
-      - wazuh-indexer
-      - wazuh-server
-    stdin_open: true
-    tty: true
+      wazuh-indexer:
+        condition: service_healthy
+      wazuh-server:
+        condition: service_healthy
+    logging: *default-logging
 
   wazuh-indexer:
     image: "wazuh-indexer:latest"
     container_name: wazuh-indexer
     hostname: wazuh-indexer
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '1.0'
-        reservations:
-          memory: 1G
-          cpus: '0.5'
-    # Security
+      resources: *resources-xlarge
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     environment:
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - "discovery.type=single-node"
@@ -88,70 +107,51 @@ services:
         hard: -1
     volumes:
       - wazuh_indexer_data:/var/lib/wazuh-indexer
+    tmpfs:
+      - /tmp:size=100M,mode=1777
     ports:
-    - "9200:9200"
-    # Health check
+      - "9200:9200"
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.wazuh-indexer.rule=Host(`wazuh-indexer.local`)"
-    - "traefik.http.routers.wazuh-indexer.service=wazuh-indexer"
-    - "traefik.http.routers.wazuh-indexer.tls=true"
-    - "traefik.http.routers.wazuh-indexer.priority=10"
-    - "traefik.http.services.wazuh-indexer.loadbalancer.server.port=9200"
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-indexer.rule=Host(`wazuh-indexer.local`)"
+      - "traefik.http.routers.wazuh-indexer.service=wazuh-indexer"
+      - "traefik.http.routers.wazuh-indexer.tls=true"
+      - "traefik.http.routers.wazuh-indexer.priority=10"
+      - "traefik.http.services.wazuh-indexer.loadbalancer.server.port=9200"
     networks:
-      - default
       - wazuh
-    stdin_open: true
-    tty: true
+    logging: *default-logging
 
   wazuh-server:
     image: "wazuh-server:latest"
     container_name: wazuh-server
     hostname: wazuh-server
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     volumes:
       - wazuh_server_data:/var/ossec/data
     ports:
-    - "1516:1516"
-    - "55000:55000"
-    # Health check
+      - "1516:1516"
+      - "55000:55000"
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "curl", "-f", "http://localhost:55000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.wazuh-server.rule=Host(`wazuh-server.local`)"
-    - "traefik.http.routers.wazuh-server.service=wazuh-server"
-    - "traefik.http.routers.wazuh-server.tls=true"
-    - "traefik.http.routers.wazuh-server.priority=10"
-    - "traefik.http.services.wazuh-server.loadbalancer.server.port=1516"
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-server.rule=Host(`wazuh-server.local`)"
+      - "traefik.http.routers.wazuh-server.service=wazuh-server"
+      - "traefik.http.routers.wazuh-server.tls=true"
+      - "traefik.http.routers.wazuh-server.priority=10"
+      - "traefik.http.services.wazuh-server.loadbalancer.server.port=1516"
     networks:
-      - default
       - wazuh
     depends_on:
-      - wazuh-indexer
-    stdin_open: true
-    tty: true
+      wazuh-indexer:
+        condition: service_healthy
+    logging: *default-logging

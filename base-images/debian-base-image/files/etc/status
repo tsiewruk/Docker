@@ -1,14 +1,77 @@
 #!/bin/bash
+#
+# Check s6 service status
+# Usage: /etc/status <service_name>
+#
 
-set -e
+set -euo pipefail
 
-source_dir="$(dirname "$0")"
-source ${source_dir}/../../source/font.sh
-
-SERVICE="${1}"
-
-if s6-svstat "/service/${SERVICE}" | grep -q '^up'; then
-  echo-info "Service ${SERVICE} is up"
+# Try to load framework logging, fallback to basic echo
+if [[ -f /usr/local/lib/entrypoint-common.sh ]]; then
+    # shellcheck disable=SC1091
+    source /usr/local/lib/entrypoint-common.sh
+    ENTRYPOINT_SERVICE_NAME="s6-manager"
+    _init_logging 2>/dev/null || true
 else
-  echo-info "Service ${SERVICE} is not up"
+    # Fallback logging functions
+    log_info() { echo "[INFO] $*"; }
+    log_success() { echo "[SUCCESS] $*"; }
+    log_error() { echo "[ERROR] $*" >&2; }
+    log_warning() { echo "[WARNING] $*" >&2; }
+fi
+
+# Validate arguments
+if [[ -z "${1:-}" ]]; then
+    log_error "Missing service name"
+    log_info "Usage: $0 <service_name>"
+    exit 1
+fi
+
+SERVICE="$1"
+
+# Validate service name (alphanumeric, dash, underscore only)
+if [[ ! "${SERVICE}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    log_error "Invalid service name: ${SERVICE}"
+    log_info "Service name must contain only letters, numbers, dash, and underscore"
+    exit 1
+fi
+
+SERVICE_PATH="/service/${SERVICE}"
+
+# Check if service directory exists
+if [[ ! -d "${SERVICE_PATH}" ]]; then
+    log_error "Service not found: ${SERVICE}"
+    log_info "Service directory does not exist: ${SERVICE_PATH}"
+    exit 1
+fi
+
+# Get service status
+if ! status_output=$(s6-svstat "${SERVICE_PATH}" 2>&1); then
+    log_error "Failed to get status for service: ${SERVICE}"
+    log_info "Error: ${status_output}"
+    exit 1
+fi
+
+# Display status
+log_info "Service: ${SERVICE}"
+echo "${status_output}"
+
+# Check if running
+if echo "${status_output}" | grep -q '^up'; then
+    log_success "Service ${SERVICE} is running"
+
+    # Try to extract and display PID
+    if pid=$(echo "${status_output}" | grep -oP 'pid \K[0-9]+' 2>/dev/null); then
+        log_info "PID: ${pid}"
+    fi
+
+    # Try to extract uptime
+    if uptime=$(echo "${status_output}" | grep -oP '\(pid [0-9]+\) \K.*' 2>/dev/null); then
+        log_info "Uptime: ${uptime}"
+    fi
+
+    exit 0
+else
+    log_info "Service ${SERVICE} is not running"
+    exit 1
 fi

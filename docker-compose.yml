@@ -37,9 +37,8 @@ volumes:
 
 # ===== COMMON BUILD CONFIGURATION =====
 x-common-build: &common-build
-  context: .
   args:
-    cookbooks_dir: ./cookbooks
+    cookbooks_dir: ../../shared
 
 # ===== COMMON LOGGING CONFIGURATION =====
 x-logging: &default-logging
@@ -48,28 +47,101 @@ x-logging: &default-logging
     max-size: "10m"
     max-file: "3"
 
+# ===== COMMON RESOURCE PROFILES =====
+x-resources-tiny: &resources-tiny
+  limits:
+    memory: 128M
+    cpus: '0.25'
+  reservations:
+    memory: 64M
+    cpus: '0.1'
+
+x-resources-small: &resources-small
+  limits:
+    memory: 256M
+    cpus: '0.25'
+  reservations:
+    memory: 128M
+    cpus: '0.1'
+
+x-resources-medium: &resources-medium
+  limits:
+    memory: 512M
+    cpus: '0.5'
+  reservations:
+    memory: 256M
+    cpus: '0.25'
+
+x-resources-large: &resources-large
+  limits:
+    memory: 1G
+    cpus: '0.75'
+  reservations:
+    memory: 512M
+    cpus: '0.5'
+
+x-resources-xlarge: &resources-xlarge
+  limits:
+    memory: 2G
+    cpus: '1.0'
+  reservations:
+    memory: 1G
+    cpus: '0.5'
+
+x-resources-xxlarge: &resources-xxlarge
+  limits:
+    memory: 3G
+    cpus: '2.0'
+  reservations:
+    memory: 1.5G
+    cpus: '1.0'
+
+# ===== COMMON SECURITY SETTINGS =====
+x-security-default: &security-default
+  security_opt:
+    - no-new-privileges:true
+
+x-security-user: &security-user
+  <<: *security-default
+  user: "1000:1000"
+
+x-security-readonly: &security-readonly
+  <<: *security-user
+  read_only: true
+
+# ===== COMMON HEALTHCHECK SETTINGS =====
+x-healthcheck-fast: &healthcheck-fast
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+x-healthcheck-medium: &healthcheck-medium
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 60s
+
+x-healthcheck-slow: &healthcheck-slow
+  interval: 60s
+  timeout: 15s
+  retries: 5
+  start_period: 120s
+
 # ===== SERVICES MANAGEMENT =====
 services:
-  ubuntu-base:
+  debian-base:
     build:
       <<: *common-build
+      context: ./base-images/debian-base-image
       args:
-        image_builder_dir: ./builders/ubuntu-base
-      dockerfile: builders/ubuntu-base/Dockerfile
-    image: "ubuntu-base:latest"
-    # Resource limits
+        image_builder_dir: .
+      dockerfile: Dockerfile
+    image: "debian-base:latest"
     deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    # Security
+      resources: *resources-medium
+    <<: *security-default
     read_only: false
-    security_opt:
-      - no-new-privileges:true
     logging: *default-logging
     stdin_open: true
     tty: true
@@ -77,27 +149,18 @@ services:
   traefik:
     build:
       <<: *common-build
+      context: ./base-images/traefik
       args:
-        image_builder_dir: ./builders/traefik
+        image_builder_dir: .
         TRAEFIK_VERSION: '2.10.4'
-      dockerfile: builders/traefik/Dockerfile
+      dockerfile: Dockerfile
     image: "traefik:latest"
     container_name: traefik
     hostname: traefik
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    # Security
+      resources: *resources-medium
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     environment:
       - TRAEFIK_CONFIG=local
       - CERT_CONFIG=local
@@ -106,12 +169,9 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    # Health check
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
       start_period: 40s
     labels:
       - "traefik.enable=true"
@@ -127,31 +187,22 @@ services:
   dev-container:
     build:
       <<: *common-build
+      context: ./base-images/dev-container
       args:
-        image_builder_dir: ./builders/dev-container
+        image_builder_dir: .
         ANSIBLE_VERSION: 2.9
         PYTHON_VERSION: 3.9
         TERRAFORM_VERSION: 1.3.7
         OPEN_TOFU_VERSION: 1.6.2
         HELM_VERSION: 3.14.4
-      dockerfile: builders/dev-container/Dockerfile
+      dockerfile: Dockerfile
     image: "dev-container:latest"
     hostname: dev-container
     container_name: dev-container
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '1.0'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     logging: *default-logging
     stdin_open: true
     tty: true
@@ -159,24 +210,17 @@ services:
   jenkins:
     build:
       <<: *common-build
+      context: ./base-images/jenkins
       args:
-        image_builder_dir: ./builders/jenkins
+        image_builder_dir: .
         OPEN_JDK_VERSION: 17
         JENKINS_VERSION: 1
-      dockerfile: builders/jenkins/Dockerfile
+      dockerfile: Dockerfile
     image: "jenkins:latest"
     hostname: jenkins
     container_name: jenkins
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 3G
-          cpus: '2.0'
-        reservations:
-          memory: 1.5G
-          cpus: '1.0'
-    # Security
+      resources: *resources-xxlarge
     user: "1000:1000"
     cap_add:
       - SYS_ADMIN
@@ -188,13 +232,9 @@ services:
     volumes:
       - jenkins_volume:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    # Health check
     healthcheck:
+      <<: *healthcheck-slow
       test: ["CMD", "curl", "-f", "http://localhost:8080/login"]
-      interval: 60s
-      timeout: 10s
-      retries: 5
-      start_period: 120s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jenkins.rule=Host(`jenkins.local`)"
@@ -210,29 +250,20 @@ services:
     profiles: ["monitoring", "all"]
     build:
       <<: *common-build
+      context: ./base-images/grafana
       args:
-        image_builder_dir: ./builders/grafana
+        image_builder_dir: .
         GRAFANA_VERSION: '10.1.4'
-      dockerfile: builders/grafana/Dockerfile
+      dockerfile: Dockerfile
     image: "grafana:latest"
     container_name: grafana
     hostname: grafana
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    # Security
-    user: "1000:1000"
+      resources: *resources-medium
+    <<: *security-user
     secrets:
       - grafana_admin_password
       - grafana_smtp_password
-    security_opt:
-      - no-new-privileges:true
     environment:
       - grafana_organization_name=MY_ORGANIZATION
       - grafana_organization_theme=dark
@@ -249,13 +280,9 @@ services:
       - "3000:3000"
     volumes:
       - grafana_volume:/var/lib/grafana
-    # Health check
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`grafana.local`)"
@@ -272,27 +299,18 @@ services:
     profiles: ["monitoring", "all"]
     build:
       <<: *common-build
+      context: ./base-images/prometheus
       args:
-        image_builder_dir: ./builders/prometheus
+        image_builder_dir: .
         PROMETHEUS_VERSION: 2.47.1
-      dockerfile: builders/prometheus/Dockerfile
+      dockerfile: Dockerfile
     image: "prometheus:latest"
     container_name: prometheus
     hostname: prometheus
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     environment:
       - PROMETHEUS_URL=prometheus.local
     ports:
@@ -301,13 +319,9 @@ services:
       - prometheus_volume:/etc/prometheus/
     tmpfs:
       - /tmp:size=100M,mode=1777
-    # Health check
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.local`)"
@@ -324,23 +338,16 @@ services:
     profiles: ["monitoring", "all"]
     build:
       <<: *common-build
+      context: ./base-images/cadvisor
       args:
-        image_builder_dir: ./builders/cadvisor
+        image_builder_dir: .
         CADVISOR_VERSION: 0.47.2
-      dockerfile: builders/cadvisor/Dockerfile
+      dockerfile: Dockerfile
     image: "cadvisor:latest"
     container_name: cadvisor
     hostname: cadvisor
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.25'
-        reservations:
-          memory: 128M
-          cpus: '0.1'
-    # Security
+      resources: *resources-small
     user: "1000:1000"
     cap_add:
       - SYS_ADMIN
@@ -360,13 +367,9 @@ services:
       - "/:/rootfs:ro"
     devices:
       - "/dev/kmsg:/dev/kmsg:r"
-    # Health check
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.local`)"
@@ -383,39 +386,25 @@ services:
     profiles: ["monitoring", "all"]
     build:
       <<: *common-build
+      context: ./base-images/node-exporter
       args:
-        image_builder_dir: ./builders/node-exporter
+        image_builder_dir: .
         NODE_EXPORTER_VERSION: 1.7.0
-      dockerfile: builders/node-exporter/Dockerfile
+      dockerfile: Dockerfile
     image: "node-exporter:latest"
     container_name: node-exporter
     hostname: node-exporter
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: '0.25'
-        reservations:
-          memory: 64M
-          cpus: '0.1'
-    # Security
-    read_only: true
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
+      resources: *resources-tiny
+    <<: *security-readonly
     ports:
       - "9100:9100"
     volumes:
       - '/:/host:ro,rslave'
     pid: host
-    # Health check
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9100/metrics"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.local`)"
@@ -432,36 +421,22 @@ services:
     profiles: ["monitoring", "all"]
     build:
       <<: *common-build
+      context: ./base-images/mysql-exporter
       args:
-        image_builder_dir: ./builders/mysql-exporter
+        image_builder_dir: .
         MYSQL_EXPORTER_VERSION: 0.15.1
-      dockerfile: builders/mysql-exporter/Dockerfile
+      dockerfile: Dockerfile
     image: "mysql-exporter:latest"
     container_name: mysql-exporter
     hostname: mysql-exporter
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: '0.25'
-        reservations:
-          memory: 64M
-          cpus: '0.1'
-    # Security
-    read_only: true
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
+      resources: *resources-tiny
+    <<: *security-readonly
     ports:
       - "9104:9104"
-    # Health check
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9104/metrics"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.mysql-exporter.rule=Host(`mysql-exporter.local`)"
@@ -478,38 +453,25 @@ services:
     profiles: ["monitoring", "all"]
     build:
       <<: *common-build
+      context: ./base-images/alert-manager
       args:
-        image_builder_dir: ./builders/alert-manager
+        image_builder_dir: .
         ALERTMANAGER_VERSION: 0.26.0
-      dockerfile: builders/alert-manager/Dockerfile
+      dockerfile: Dockerfile
     image: "alert-manager:latest"
     container_name: alert-manager
     hostname: alert-manager
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.25'
-        reservations:
-          memory: 128M
-          cpus: '0.1'
-    # Security
+      resources: *resources-small
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     environment:
       - ALERTMANAGER_URL=alert-manager.local
     ports:
       - "9093:9093"
-    # Health check
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.alert-manager.rule=Host(`alert-manager.local`)"
@@ -526,36 +488,22 @@ services:
     profiles: ["monitoring", "all"]
     build:
       <<: *common-build
+      context: ./base-images/blackbox
       args:
-        image_builder_dir: ./builders/blackbox
+        image_builder_dir: .
         BLACKBOX_VERSION: 0.24.0
-      dockerfile: builders/blackbox/Dockerfile
+      dockerfile: Dockerfile
     image: "blackbox:latest"
     container_name: blackbox
     hostname: blackbox
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: '0.25'
-        reservations:
-          memory: 64M
-          cpus: '0.1'
-    # Security
-    read_only: true
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
+      resources: *resources-tiny
+    <<: *security-readonly
     ports:
       - "9115:9115"
-    # Health check
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9115/metrics"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.blackbox.rule=Host(`blackbox.local`)"
@@ -572,36 +520,23 @@ services:
     profiles: ["security", "all"]
     build:
       <<: *common-build
+      context: ./base-images/wazuh-dashboard
       args:
-        image_builder_dir: ./builders/wazuh-dashboard
+        image_builder_dir: .
         WAZUH_DASHBOARD_VERSION: 4.7
-      dockerfile: builders/wazuh-dashboard/Dockerfile
+      dockerfile: Dockerfile
     image: "wazuh-dashboard:latest"
     container_name: wazuh-dashboard
     hostname: wazuh-dashboard
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     ports:
       - "5601:5601"
-    # Health check
     healthcheck:
+      <<: *healthcheck-slow
       test: ["CMD", "curl", "-f", "http://localhost:5601/status"]
-      interval: 60s
-      timeout: 15s
-      retries: 5
-      start_period: 120s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`wazuh-dashboard.local`)"
@@ -623,14 +558,14 @@ services:
     profiles: ["security", "all"]
     build:
       <<: *common-build
+      context: ./base-images/wazuh-indexer
       args:
-        image_builder_dir: ./builders/wazuh-indexer
+        image_builder_dir: .
         WAZUH_DASHBOARD_VERSION: 4.7
-      dockerfile: builders/wazuh-indexer/Dockerfile
+      dockerfile: Dockerfile
     image: "wazuh-indexer:latest"
     container_name: wazuh-indexer
     hostname: wazuh-indexer
-    # Resource limits
     deploy:
       resources:
         limits:
@@ -639,24 +574,18 @@ services:
         reservations:
           memory: 2G
           cpus: '0.75'
-    # Security
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     environment:
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
     ports:
       - "9200:9200"
     tmpfs:
       - /tmp:size=100M,mode=1777
-    # Health check
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
-      interval: 30s
-      timeout: 10s
       retries: 5
-      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-indexer.rule=Host(`wazuh-indexer.local`)"
@@ -673,37 +602,25 @@ services:
     profiles: ["security", "all"]
     build:
       <<: *common-build
+      context: ./base-images/wazuh-server
       args:
-        image_builder_dir: ./builders/wazuh-server
+        image_builder_dir: .
         WAZUH_SERVER_VERSION: 4.7
-      dockerfile: builders/wazuh-server/Dockerfile
+      dockerfile: Dockerfile
     image: "wazuh-server:latest"
     container_name: wazuh-server
     hostname: wazuh-server
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     ports:
       - "1516:1516"
       - "55000:55000"
-    # Health check
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "curl", "-f", "http://localhost:55000/"]
-      interval: 30s
-      timeout: 10s
       retries: 5
-      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-server.rule=Host(`wazuh-server.local`)"
@@ -723,37 +640,24 @@ services:
     profiles: ["web", "all"]
     build:
       <<: *common-build
+      context: ./base-images/varnish
       args:
-        image_builder_dir: ./builders/varnish
-      dockerfile: builders/varnish/Dockerfile
+        image_builder_dir: .
+      dockerfile: Dockerfile
     image: "varnish:latest"
     container_name: varnish
     hostname: varnish
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    # Security
+      resources: *resources-medium
+    <<: *security-user
     read_only: false
-    user: "1000:1000"
-    security_opt:
-      - no-new-privileges:true
     environment:
       - VARNISH_CONFIG=default
     ports:
       - "6081:6081"
-    # Health check
     healthcheck:
+      <<: *healthcheck-fast
       test: ["CMD", "varnishstat", "-1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     networks:
       - web
     logging: *default-logging
@@ -762,25 +666,17 @@ services:
   rabbitmq:
     build:
       <<: *common-build
+      context: ./base-images/rabbitmq
       args:
-        image_builder_dir: ./builders/rabbitmq
-      dockerfile: builders/rabbitmq/Dockerfile
+        image_builder_dir: .
+      dockerfile: Dockerfile
     image: "rabbitmq:latest"
     container_name: rabbitmq
     hostname: rabbitmq
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-default
     read_only: false
-    security_opt:
-      - no-new-privileges:true
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS_FILE=/run/secrets/rabbitmq_password
@@ -790,13 +686,10 @@ services:
       - "5672:5672"
       - "15672:15672"
       - "25672:25672"
-    # Health check
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 30s
-      timeout: 10s
       retries: 5
-      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.local`)"
@@ -812,27 +705,19 @@ services:
     profiles: ["web", "all"]
     build:
       <<: *common-build
+      context: ./base-images/wordpress
       args:
-        image_builder_dir: ./builders/wordpress
+        image_builder_dir: .
         WORDPRESS_VERSION: 6.4.3
         PHP_VERSION: 8.2
-      dockerfile: builders/wordpress/Dockerfile
+      dockerfile: Dockerfile
     image: "wordpress:latest"
     container_name: wordpress
     hostname: wordpress
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    # Security
+      resources: *resources-medium
+    <<: *security-default
     read_only: false
-    security_opt:
-      - no-new-privileges:true
     environment:
       - WORDPRESS_DB_HOST=mysql:3306
       - WORDPRESS_DB_USER=wordpress
@@ -843,18 +728,15 @@ services:
     ports:
       - "8083:80"
       - "8443:443"
-    # Health check
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "curl", "-f", "http://localhost:80/wp-admin/install.php"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wordpress.rule=Host(`wordpress.local`)"
       - "traefik.http.routers.wordpress.service=wordpress"
       - "traefik.http.routers.wordpress.tls=true"
+      - "traefik.http.routers.wordpress.priority=10"
       - "traefik.http.services.wordpress.loadbalancer.server.port=80"
     networks:
       - web
@@ -868,27 +750,19 @@ services:
     profiles: ["web", "all"]
     build:
       <<: *common-build
+      context: ./base-images/mysql
       args:
-        image_builder_dir: ./builders/mysql
+        image_builder_dir: .
         MYSQL_VERSION: 8.29-1
         MYSQL_ROOT_PASS: default
-      dockerfile: builders/mysql/Dockerfile
+      dockerfile: Dockerfile
     image: "mysql:latest"
     container_name: mysql
     hostname: mysql
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-default
     read_only: false
-    security_opt:
-      - no-new-privileges:true
     environment:
       - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
       - MYSQL_DATABASE=wordpress
@@ -905,13 +779,10 @@ services:
     tmpfs:
       - /tmp:size=100M,mode=1777
     command: --default-authentication-plugin=mysql_native_password --innodb-buffer-pool-size=512M
-    # Health check
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
-      interval: 30s
-      timeout: 10s
       retries: 5
-      start_period: 60s
     networks:
       - web
     logging: *default-logging

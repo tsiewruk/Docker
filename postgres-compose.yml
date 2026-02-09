@@ -12,25 +12,58 @@ volumes:
   pgadmin_volume:
     driver: local
 
+# ===== COMMON LOGGING CONFIGURATION =====
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# ===== COMMON RESOURCE PROFILES =====
+x-resources-medium: &resources-medium
+  limits:
+    memory: 512M
+    cpus: '0.5'
+  reservations:
+    memory: 256M
+    cpus: '0.25'
+
+x-resources-large: &resources-large
+  limits:
+    memory: 1G
+    cpus: '0.75'
+  reservations:
+    memory: 512M
+    cpus: '0.5'
+
+# ===== COMMON SECURITY SETTINGS =====
+x-security-default: &security-default
+  security_opt:
+    - no-new-privileges:true
+
+# ===== COMMON HEALTHCHECK SETTINGS =====
+x-healthcheck-fast: &healthcheck-fast
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+x-healthcheck-medium: &healthcheck-medium
+  interval: 30s
+  timeout: 10s
+  retries: 5
+  start_period: 60s
+
 # ===== SERVICES MANAGEMENT =====
 services:
   postgres:
-    image: postgres:15-alpine 
+    image: postgres:15-alpine
     container_name: postgres
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    # Security
+      resources: *resources-large
+    <<: *security-default
     read_only: false
-    security_opt:
-      - no-new-privileges:true
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
@@ -38,68 +71,53 @@ services:
     secrets:
       - postgres_password
     volumes:
-    - postgres_volume:/var/lib/postgresql/data
+      - postgres_volume:/var/lib/postgresql/data
+    tmpfs:
+      - /tmp:size=100M,mode=1777
+      - /run/postgresql:size=10M,mode=0770
     ports:
-    - "5432:5432"
-    # Health check
+      - "5432:5432"
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.postgres.rule=Host(`postgres.local`)"
-    - "traefik.http.routers.postgres.service=postgres"
-    - "traefik.http.routers.postgres.tls=true"
-    - "traefik.http.routers.postgres.priority=10"
-    - "traefik.http.services.postgres.loadbalancer.server.port=5432"
-    stdin_open: true
-    tty: true
+      - "traefik.enable=true"
+      - "traefik.http.routers.postgres.rule=Host(`postgres.local`)"
+      - "traefik.http.routers.postgres.service=postgres"
+      - "traefik.http.routers.postgres.tls=true"
+      - "traefik.http.routers.postgres.priority=10"
+      - "traefik.http.services.postgres.loadbalancer.server.port=5432"
+    logging: *default-logging
 
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
     hostname: pgadmin
     restart: unless-stopped
-    # Resource limits
     deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    # Security
+      resources: *resources-medium
+    <<: *security-default
     read_only: false
-    security_opt:
-      - no-new-privileges:true
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_password
     secrets:
       - pgadmin_password
     volumes:
-    - pgadmin_volume:/var/lib/pgadmin
+      - pgadmin_volume:/var/lib/pgadmin
     ports:
-    - "8084:80"
-    # Health check
+      - "8084:80"
     healthcheck:
+      <<: *healthcheck-medium
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/misc/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.local`)"
-    - "traefik.http.routers.pgadmin.service=pgadmin"
-    - "traefik.http.routers.pgadmin.tls=true"
-    - "traefik.http.routers.pgadmin.priority=10"
-    - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+      - "traefik.enable=true"
+      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.local`)"
+      - "traefik.http.routers.pgadmin.service=pgadmin"
+      - "traefik.http.routers.pgadmin.tls=true"
+      - "traefik.http.routers.pgadmin.priority=10"
+      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
     depends_on:
-      - postgres
-    stdin_open: true
-    tty: true
+      postgres:
+        condition: service_healthy
+    logging: *default-logging
